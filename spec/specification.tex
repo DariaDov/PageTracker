@@ -1,0 +1,510 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{\textbf{#1}}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\hypertarget{srs-pagetracker}{%
+\section{SRS: PageTracker}\label{srs-pagetracker}}
+
+\textbf{Версія:} 1.0 · \textbf{Статус:} узгоджено за SKED-діалогом
+
+\hypertarget{1-ux43fux440ux438ux437ux43dux430ux447ux435ux43dux43dux44f-ux456-ux43cux435ux436ux456}{%
+\subsection{1. Призначення і
+межі}\label{1-ux43fux440ux438ux437ux43dux430ux447ux435ux43dux43dux44f-ux456-ux43cux435ux436ux456}}
+
+PageTracker --- україномовний вебзастосунок для багатьох незалежних
+користувачів. Він дає змогу вести власну бібліотеку книг, фіксувати
+послідовно прочитані сторінки й бачити середній темп читання за
+календарні періоди. Дані користувача ізольовані від даних інших
+користувачів.
+
+До v1 не входять: адміністратори, зміна/відновлення пароля або пошти,
+видалення облікового запису, нагадування, інтеграції, імпорт/експорт,
+пошук, фільтри, сортування книг, резервне копіювання, юридичні екрани,
+спеціальні функції доступності та журналювання технічних помилок.
+
+\hypertarget{2-ux433ux43bux43eux441ux430ux440ux456ux439}{%
+\subsection{2.
+Глосарій}\label{2-ux433ux43bux43eux441ux430ux440ux456ux439}}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Термін & Визначення \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Користувач & Особа з окремим обліковим записом і власними даними. \\
+Бібліотека & Набір книг одного користувача. \\
+Книга & Назва, автор, загальна кількість сторінок, статус і
+необов'язковий рейтинг. \\
+Запис читання & Діапазон послідовно прочитаних сторінок однієї книги за
+поточну дату. \\
+\texttt{розпочати} & Статус нової книги без записів. \\
+\texttt{читається} & Статус книги з записами, яка ще не завершена. \\
+\texttt{прочитано} & Незворотний статус після фіксації останньої
+сторінки. \\
+Рейтинг & Необов'язкова оцінка завершеної книги від 1 до 5 зірок. \\
+\end{longtable}
+
+\hypertarget{3-ux437ux430ux433ux430ux43bux44cux43dux438ux439-ux43eux43fux438ux441}{%
+\subsection{3. Загальний
+опис}\label{3-ux437ux430ux433ux430ux43bux44cux43dux438ux439-ux43eux43fux438ux441}}
+
+Система має головну сторінку з формою нового запису, бібліотеку,
+сторінку деталей книги та сторінку статистики. Після входу відкривається
+головна сторінка. Основна навігація: «Головна сторінка», «Бібліотека»,
+«Статистика», «Вихід».
+
+\hypertarget{4-ux444ux443ux43dux43aux446ux456ux43eux43dux430ux43bux44cux43dux456-ux432ux438ux43cux43eux433ux438}{%
+\subsection{4. Функціональні
+вимоги}\label{4-ux444ux443ux43dux43aux446ux456ux43eux43dux430ux43bux44cux43dux456-ux432ux438ux43cux43eux433ux438}}
+
+\hypertarget{41-ux434ux43eux441ux442ux443ux43f}{%
+\subsubsection{4.1 Доступ}\label{41-ux434ux43eux441ux442ux443ux43f}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{REQ-F-001 --- Ізоляція даних.} Автентифікований користувач має
+  доступ лише до своєї бібліотеки, записів і статистики.
+  \textbf{Критерій:} користувач A не може читати або змінювати дані B.
+\item
+  \textbf{REQ-F-019 --- Реєстрація.} Система створює обліковий запис за
+  електронною поштою та непорожнім паролем. Після реєстрації користувач
+  виконує окремий вхід.
+\item
+  \textbf{REQ-F-020 --- Вхід.} Система автентифікує користувача за
+  електронною поштою та паролем. \textbf{Критерій:} коректні дані
+  відкривають головну сторінку.
+\item
+  \textbf{REQ-F-021 --- Унікальність пошти.} Пошта унікальна з
+  урахуванням регістру: \texttt{User@example.com} і
+  \texttt{user@example.com} різні.
+\item
+  \textbf{REQ-F-022 --- Верифікація пошти.} Підтвердження пошти для
+  входу не потрібне.
+\item
+  \textbf{REQ-F-023 --- Пароль.} Пароль містить щонайменше один символ;
+  інших правил складу немає.
+\item
+  \textbf{REQ-F-029 --- Вихід.} Користувач може завершити сесію; після
+  цього дані недоступні без нового входу.
+\item
+  \textbf{REQ-F-030 --- Помилка доступу.} За зайнятої пошти або
+  неправильних даних входу показується «Неправильні дані».
+\item
+  \textbf{REQ-F-041 --- Після реєстрації.} Система показує форму входу,
+  не авторизуючи користувача автоматично.
+\item
+  \textbf{REQ-F-042 --- Пробіли.} Поля назви, автора, пошти й пароля
+  лише з пробілів вважаються порожніми.
+\end{itemize}
+
+\hypertarget{42-ux43aux43dux438ux433ux438-ux442ux430-ux440ux435ux439ux442ux438ux43dux433}{%
+\subsubsection{4.2 Книги та
+рейтинг}\label{42-ux43aux43dux438ux433ux438-ux442ux430-ux440ux435ux439ux442ux438ux43dux433}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{REQ-F-002 --- Створення книги.} Користувач створює власну
+  книгу із назвою, автором і загальною кількістю сторінок.
+\item
+  \textbf{REQ-F-004 --- Статуси.} Книга має статус \texttt{розпочати},
+  \texttt{читається} або \texttt{прочитано}; нова книга має
+  \texttt{розпочати} і не може одразу мати \texttt{прочитано}.
+\item
+  \textbf{REQ-F-005 --- Рейтинг.} Нова книга не має рейтингу. Власник
+  може встановити або змінити 1--5 зірок лише для \texttt{прочитано}.
+\item
+  \textbf{REQ-F-013 --- Загальна кількість сторінок.} Її можна змінити
+  лише поки книга не має записів.
+\item
+  \textbf{REQ-F-014 --- Видалення книги.} Перед видаленням показується
+  «Ви хочете видалити цю книгу». Після підтвердження видаляються книга й
+  усі її записи. \textbf{Критерій:} дані зникають з бібліотеки та
+  статистики.
+\item
+  \textbf{REQ-F-024 --- Метадані.} Назва й автор обов'язкові; дублікати
+  назви та автора дозволені.
+\item
+  \textbf{REQ-F-026 --- Кількість сторінок.} Значення --- ціле число не
+  менше 1.
+\item
+  \textbf{REQ-F-027 --- Некоректна книга.} За порожньої або некоректної
+  назви, автора чи кількості сторінок показується «заповніть дані»,
+  книга не зберігається.
+\item
+  \textbf{REQ-F-028 --- Редагування метаданих.} Назву й автора можна
+  редагувати за будь-якого статусу.
+\end{itemize}
+
+\hypertarget{43-ux437ux430ux43fux438ux441ux438-ux447ux438ux442ux430ux43dux43dux44f}{%
+\subsubsection{4.3 Записи
+читання}\label{43-ux437ux430ux43fux438ux441ux438-ux447ux438ux442ux430ux43dux43dux44f}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{REQ-F-003 --- Створення запису.} Для однієї книги в одну дату
+  дозволено кілька записів. Прочитано сторінок:
+  \texttt{кінцева\ −\ початкова\ +\ 1}.
+\item
+  \textbf{REQ-F-006 --- Завершення.} Запис з останньою сторінкою
+  автоматично встановлює \texttt{прочитано}; статус незворотний. Запис
+  100--100 для книги на 100 сторінок допустимий.
+\item
+  \textbf{REQ-F-007 --- Дата.} Система автоматично встановлює поточну
+  дату; користувач її не вводить і не редагує.
+\item
+  \textbf{REQ-F-008 --- Неперетин.} Діапазони однієї книги не
+  перетинаються. За перетину зміна не зберігається, показується «Ці
+  сторінки вже прочитані».
+\item
+  \textbf{REQ-F-009 --- Порядок меж.} Якщо кінцева сторінка менша за
+  початкову, запис не зберігається, показується «Кінцева сторінка, менша
+  за початкову».
+\item
+  \textbf{REQ-F-010 --- Межі сторінок.} Сторінки --- цілі числа від 1 до
+  загальної кількості; для значень поза межами, нецілих або нечислових
+  показується «Будь ласка, змініть сторінку».
+\item
+  \textbf{REQ-F-011 --- Редагування.} Редагувати запис можна лише для
+  книги зі статусом \texttt{читається}.
+\item
+  \textbf{REQ-F-025 --- Початок читання.} Перший незавершальний запис
+  змінює статус \texttt{розпочати} на \texttt{читається}.
+\item
+  \textbf{REQ-F-031 --- Видалення запису.} Видалення доступне лише для
+  \texttt{читається}; перед ним показується «Ви хочете видалити цей
+  запис».
+\item
+  \textbf{REQ-F-032 --- Завершення після редагування.} Редагування
+  запису до останньої сторінки завершує книгу.
+\item
+  \textbf{REQ-F-033 --- Повернення статусу.} Видалення останнього запису
+  \texttt{читається} повертає статус \texttt{розпочати}.
+\item
+  \textbf{REQ-F-034 --- Валідація редагування.} Під час редагування
+  діють усі правила створення запису.
+\item
+  \textbf{REQ-F-035 --- Вибір книги.} У формі нового запису доступні
+  лише книги \texttt{розпочати} або \texttt{читається}.
+\item
+  \textbf{REQ-F-036 --- Безперервність.} Перший запис починається зі
+  сторінки 1. Кожен наступний починається одразу після попереднього; за
+  пропуску показується «Відсутні сторінки» і запис не зберігається.
+\item
+  \textbf{REQ-F-037 --- Видалення без розриву.} Якщо видалення створить
+  розрив у решті записів, система його відхиляє та показує «Видалення
+  заборонене».
+\item
+  \textbf{REQ-F-043 --- Неповна форма.} Якщо не вибрано книгу або не
+  заповнено початкову чи кінцеву сторінку, запис не зберігається без
+  окремого повідомлення.
+\end{itemize}
+
+\hypertarget{44-ux441ux442ux430ux442ux438ux441ux442ux438ux43aux430}{%
+\subsubsection{4.4
+Статистика}\label{44-ux441ux442ux430ux442ux438ux441ux442ux438ux43aux430}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{REQ-F-015 --- Середнє.} Система обчислює середню кількість
+  сторінок за всіма книгами користувача для тижня, місяця або року.
+\item
+  \textbf{REQ-F-016 --- Періоди.} За замовчуванням показано поточний
+  тиждень (понеділок--неділя); доступні минулі тижні, місяці й роки.
+\item
+  \textbf{REQ-F-017 --- Формула.} За наявності хоча б одного запису
+  середнє дорівнює сумі сторінок, поділеній на кількість днів періоду,
+  що вже настали. Минулі дні без записів дорівнюють 0, майбутні не
+  враховуються.
+\item
+  \textbf{REQ-F-018 --- Немає даних.} Якщо записів у періоді немає,
+  показується «Щоб побачити статистику, додайте новий запис» замість
+  числа.
+\item
+  \textbf{REQ-F-038 --- Формат.} Середнє округлюється до найближчого
+  цілого; \texttt{0,5} округлюється вгору. Показується також кількість
+  днів у знаменнику.
+\item
+  \textbf{REQ-F-039 --- Актуальність.} Статистика враховує створення,
+  редагування й видалення записів.
+\item
+  \textbf{REQ-F-040 --- Технічна помилка.} За технічної помилки
+  показується «Помилка».
+\end{itemize}
+
+\hypertarget{5-ux432ux438ux43cux43eux433ux438-ux434ux43e-ux456ux43dux442ux435ux440ux444ux435ux439ux441ux443}{%
+\subsection{5. Вимоги до
+інтерфейсу}\label{5-ux432ux438ux43cux43eux433ux438-ux434ux43e-ux456ux43dux442ux435ux440ux444ux435ux439ux441ux443}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{REQ-I-001.} Система є вебзастосунком у браузері.
+\item
+  \textbf{REQ-I-002.} Усі елементи та повідомлення інтерфейсу
+  українською.
+\item
+  \textbf{REQ-I-003.} Сторінка деталей містить метадані, статус,
+  рейтинг, записи й доступні дії.
+\item
+  \textbf{REQ-I-004.} Бібліотека показує назву, автора, статус,
+  кількість сторінок і рейтинг за наявності.
+\item
+  \textbf{REQ-I-005.} Окрема сторінка статистики показує період, середнє
+  і кількість днів або повідомлення про відсутність даних.
+\item
+  \textbf{REQ-I-006.} У списку записів показані лише дата і кількість
+  сторінок; порядок --- від найстарішої дати до найновішої, у межах дати
+  --- за зростанням початкової сторінки.
+\item
+  \textbf{REQ-I-007.} Запис створюється на головній сторінці.
+\item
+  \textbf{REQ-I-008.} Форма запису містить вибір книги, початкову та
+  кінцеву сторінки; дата й кількість не вводяться.
+\item
+  \textbf{REQ-I-009.} Після входу відкривається головна сторінка.
+\item
+  \textbf{REQ-I-010.} Книга створюється формою у бібліотеці.
+\item
+  \textbf{REQ-I-011.} Після створення відкривається бібліотека з новою
+  книгою.
+\item
+  \textbf{REQ-I-012.} Доступні розділи «Головна сторінка», «Бібліотека»,
+  «Статистика» та «Вихід».
+\item
+  \textbf{REQ-I-013.} Запис редагується на сторінці деталей відповідної
+  книги.
+\item
+  \textbf{REQ-I-014.} На сторінках входу й реєстрації є переходи між
+  ними.
+\item
+  \textbf{REQ-I-015.} Бібліотека поділена на сторінки по 16 книг.
+\item
+  \textbf{REQ-I-016.} Перехід між сторінками здійснюється номерами
+  сторінок.
+\item
+  \textbf{REQ-I-017.} Після видалення книги відкривається бібліотека.
+\item
+  \textbf{REQ-I-018.} Метадані книги редагуються на сторінці її деталей.
+\item
+  \textbf{REQ-I-019.} Після створення запису відкривається головна
+  сторінка.
+\end{itemize}
+
+\hypertarget{6-ux43dux435ux444ux443ux43dux43aux446ux456ux43eux43dux430ux43bux44cux43dux456-ux432ux438ux43cux43eux433ux438}{%
+\subsection{6. Нефункціональні
+вимоги}\label{6-ux43dux435ux444ux443ux43dux43aux446ux456ux43eux43dux430ux43bux44cux43dux456-ux432ux438ux43cux43eux433ux438}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{REQ-NF-001 --- Сумісність.} Система коректно працює в сучасних
+  настільних браузерах.
+\item
+  \textbf{REQ-NF-002 --- Продуктивність.} За активності до 10
+  користувачів вхід, відкриття бібліотеки, створення запису й показ
+  статистики виконуються за ≤ 2 секунди.
+\item
+  \textbf{REQ-NF-003 --- Безпека.} Паролі не зберігаються відкрито,
+  передавання даних відбувається через HTTPS.
+\item
+  \textbf{REQ-NF-004 --- Збереженість.} Збережені дані доступні після
+  оновлення сторінки, виходу й повторного входу.
+\item
+  \textbf{REQ-NF-005 --- Сесія.} Сесія не завершується автоматично, доки
+  користувач не натисне «Вихід».
+\item
+  \textbf{REQ-NF-006 --- Атомарність.} За технічної помилки створення
+  або редагування книги чи запису дані не зберігаються частково.
+\item
+  \textbf{REQ-NF-007 --- Місткість.} Підтримуються до 100 книг і 5 000
+  записів на користувача.
+\item
+  \textbf{REQ-NF-008 --- Test-Driven Development.} Для кожної нової або
+  зміненої функціональної вимоги розробник має спочатку створити
+  автоматизований тест, що відтворює критерій прийняття або BDD-сценарій
+  і не проходить до реалізації відповідної поведінки.
+\item
+  \textbf{REQ-NF-009 --- Регресійна перевірка.} Перед інтеграцією змін
+  набір автоматизованих тестів, створених для реалізації вимог, має
+  завершуватися успішно.
+\end{itemize}
+
+\hypertarget{7-ux43fux440ux43eux454ux43aux442ux43dux456-ux43eux431ux43cux435ux436ux435ux43dux43dux44f}{%
+\subsection{7. Проєктні
+обмеження}\label{7-ux43fux440ux43eux454ux43aux442ux43dux456-ux43eux431ux43cux435ux436ux435ux43dux43dux44f}}
+
+\begin{itemize}
+\tightlist
+\item
+  Серверна частина: \textbf{Node.js}; клієнтська: \textbf{React}; база
+  даних: \textbf{PostgreSQL}.
+\item
+  Часовий пояс: \texttt{Europe/Kyiv}.
+\item
+  У v1 немає пошуку, фільтрів і сортування книг; записи відображаються
+  одним списком без сторінок.
+\item
+  Формат електронної пошти не перевіряється; пошта не верифікується;
+  кількість невдалих входів не обмежується.
+\item
+  Не встановлюються SLA, резервне копіювання, спеціальна доступність,
+  юридичні екрани та журналювання технічних помилок.
+\end{itemize}
+
+\hypertarget{8-ux43aux43bux44eux447ux43eux432ux456-ux441ux446ux435ux43dux430ux440ux456ux457-ux43fux440ux438ux439ux43dux44fux442ux442ux44f}{%
+\subsection{8. Ключові сценарії
+прийняття}\label{8-ux43aux43bux44eux447ux43eux432ux456-ux441ux446ux435ux43dux430ux440ux456ux457-ux43fux440ux438ux439ux43dux44fux442ux442ux44f}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Scenario: Завершення книги}
+\NormalTok{  Given книга "читається" і має 100 сторінок}
+\NormalTok{  When користувач зберігає допустимий запис 91–100}
+\NormalTok{  Then статус стає "прочитано"}
+\NormalTok{  And її записи не можна редагувати або видаляти}
+
+\NormalTok{Scenario: Пропуск сторінок}
+\NormalTok{  Given існує запис 1–10}
+\NormalTok{  When користувач створює запис 12–20}
+\NormalTok{  Then система не зберігає запис}
+\NormalTok{  And показує "Відсутні сторінки"}
+
+\NormalTok{Scenario: Видалення проміжного запису}
+\NormalTok{  Given книга має записи 1–10, 11–20, 21–30}
+\NormalTok{  When користувач підтверджує видалення 11–20}
+\NormalTok{  Then система не видаляє запис}
+\NormalTok{  And показує "Видалення заборонене"}
+
+\NormalTok{Scenario: Немає статистики}
+\NormalTok{  Given у вибраному періоді немає записів}
+\NormalTok{  When користувач відкриває статистику}
+\NormalTok{  Then система показує "Щоб побачити статистику, додайте новий запис"}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{9-ux43aux43eux43dux432ux435ux43dux446ux456ux44f-ux43aux43eux43cux456ux442ux456ux432}{%
+\subsection{9. Конвенція
+комітів}\label{9-ux43aux43eux43dux432ux435ux43dux446ux456ux44f-ux43aux43eux43cux456ux442ux456ux432}}
+
+Формат: \texttt{префікс:\ стислий\ опис}.
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{spec:} --- специфікації в \texttt{/spec}; \texttt{test:} ---
+  тести; \texttt{feat:} --- функціональність; \texttt{docs:} ---
+  документація; \texttt{gate:} --- релізи та CI/CD.
+\end{itemize}
+
+\end{document}
