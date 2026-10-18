@@ -1,0 +1,41 @@
+@startgantt
+printscale daily
+scale 2000 width
+
+[Базова домовленість] as [P0] requires 1 day
+[P0] starts D+0
+[GATE-00] as [G0] happens at [P0]'s end
+
+[Технічний каркас] as [P1] requires 3 days
+[P1] starts at [G0]'s end
+[GATE-01] as [G1] happens at [P1]'s end
+
+[Реєстрація] as [P2] requires 2 days
+[P2] starts at [G1]'s end
+[GATE-03] as [G2] happens at [P2]'s end
+
+[Доступ і сесія] as [P3] requires 3 days
+[P3] starts at [G2]'s end
+[GATE-04] as [G3] happens at [P3]'s end
+
+[Навігація й бібліотека] as [P4] requires 4 days
+[P4] starts at [G3]'s end
+[GATE-05] as [G4] happens at [P4]'s end
+
+[Деталі та створення записів] as [P5] requires 7 days
+[P5] starts at [G4]'s end
+[GATE-06...08] as [G5] happens at [P5]'s end
+
+[Керування даними читання (Day 21–24)] as [P6] requires 4 days
+[P6] starts at [G5]'s end
+[GATE-09...10] as [G6] happens at [P6]'s end
+
+[Статистика] as [P7] requires 3 days
+[P7] starts at [G6]'s end
+[GATE-11] as [G7] happens at [P7]'s end
+
+[Нефункціональна перевірка та інтеграція] as [P8] requires 4 days
+[P8] starts at [G7]'s end
+[GATE-12...13] as [G8] happens at [P8]'s end
+
+@endgantt
