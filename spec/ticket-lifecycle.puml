@@ -2,49 +2,33 @@
 title Життєвий цикл функціонального тікета PageTracker
 top to bottom direction
 
-skinparam shadowing false
-skinparam state {
-  BackgroundColor #F8FAFC
-  BorderColor #475569
-  FontColor #0F172A
-}
-
-state "Заплановано\nREQ-ID, SPEC/ADD чинні" as Planned
-state "TEST створено\nпочатково не проходить" as TestReady
-state "Очікує рішення Gate" as GateReview
-state "Реалізація\nFEAT" as Development
-state "Verification\nVER" as Verification
+state "GATE-00 відкритий" as Planned
+state "TEST створено" as TestReady
+state "Реалізація FEAT" as Development
+state "Очікує Verification" as Verification
 state "Очікує Validation" as Validation
-state "Валідовано\nVAL" as Validated
-state "Документацію\nоновлено" as Documented
+state "Очікує рішення Gate" as GateReview
+state "Документацію оновлено" as Documented
 state "Фінальний Gate" as ReleaseGate
-state "Завершено /\nдозволено інтеграцію" as Done
-state "Потрібне уточнення\nSRS / Addendum" as Clarification
+state "Завершено" as Done
+state "Потрібне уточнення" as Clarification
 state "Заблоковано" as Blocked
 
-[*] --> Planned : Людина\nзатверджує SPEC / ADD
-Planned --> TestReady : Агент\nстворює TEST за REQ-ID
-TestReady --> GateReview : Агент\nнадає доказ початкового падіння тесту
-GateReview --> Development : Людина\nвідкриває GATE
-Development --> Verification : Агент\nреалізує FEAT і запускає перевірки
-Verification --> Validation : Агент\nнадає результати VER та регресії
-Validation --> Validated : Людина\nпідтверджує VAL
-Validated --> Documented : Агент\nоновлює простежуваність і документацію
-Documented --> ReleaseGate : Агент\nнадає повний набір доказів
-ReleaseGate --> Done : Людина\nвідкриває фінальний GATE
+[*] --> Planned : Людина затверджує SPEC / ADD
+Planned --> TestReady : Агент створює TEST
+TestReady --> Development : Агент надає доказ падіння тесту
+Development --> Verification : Агент реалізує FEAT і запускає перевірки
+Verification --> Validation : Агент надає результати VER
+Validation --> GateReview : Людина підтверджує VAL
+GateReview --> Documented : Людина відкриває GATE
+Documented --> ReleaseGate : Документація перевірена
+ReleaseGate --> Done : Людина відкриває фінальний GATE
 Done --> [*]
 
-TestReady --> Clarification : Агент\nвиявив неоднозначність SRS
-Clarification --> Planned : Людина\nзатверджує Specification / Addendum
-GateReview --> Blocked : Людина\nвідмовляє у GATE
-Blocked --> TestReady : Агент\nусуває зауваження до TEST / доказів
-Verification --> Development : Агент\nTEST або VER не проходить
-Validation --> Clarification : Людина\nрезультат не відповідає задуму
-ReleaseGate --> Blocked : Людина\nне відкриває GATE
-
-legend bottom
-  |= Роль |= Повноваження на переході |
-  | Агент | TEST, FEAT, VER, документація; може повідомити про блокер. |
-  | Людина | Specification/Addendum, VAL і всі рішення GATE. |
-endlegend
+TestReady --> Clarification : Агент виявив неоднозначність SRS
+Clarification --> Planned : Людина затверджує Specification / Addendum
+GateReview --> Blocked : Людина відмовляє у GATE
+Blocked --> TestReady : Агент усуває зауваження до TEST
+Validation --> Clarification : Людина не підтверджує VAL
+ReleaseGate --> Blocked : Людина не відкриває GATE
 @enduml

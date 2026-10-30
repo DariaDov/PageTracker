@@ -1,0 +1,1653 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PageTracker REST API",
+    "version": "1.0.0",
+    "description": "Контракт REST API PageTracker, узгоджений із SRS v1.0. Усі дати є календарними датами в Europe/Kyiv. Власник даних визначається з активної сесії; API не приймає ownerId від клієнта. API-CL-01…12 у spec/api-contract-addendum.md погоджені на API-GATE 2026-10-30."
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "PageTracker API"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Реєстрація та сесія користувача"
+    },
+    {
+      "name": "Books",
+      "description": "Бібліотека та книги користувача"
+    },
+    {
+      "name": "Reading records",
+      "description": "Записи читання книг"
+    },
+    {
+      "name": "Statistics",
+      "description": "Похідна статистика за календарний період"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "register",
+        "summary": "Зареєструвати обліковий запис",
+        "description": "Створює користувача без автоматичного входу.",
+        "security": [],
+        "x-requirement-ids": [
+          "REQ-F-019",
+          "REQ-F-021",
+          "REQ-F-022",
+          "REQ-F-023",
+          "REQ-F-030",
+          "REQ-F-041",
+          "REQ-F-042",
+          "REQ-NF-003"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Обліковий запис створено; сесію не створено.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "user"
+                      ],
+                      "properties": {
+                        "user": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidJson"
+          },
+          "409": {
+            "description": "Пошта вже зайнята; повідомлення не розкриває додаткових даних.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "examples": {
+                  "duplicateEmail": {
+                    "value": {
+                      "type": "urn:pagetracker:problem:EMAIL_ALREADY_EXISTS",
+                      "title": "Неправильні дані",
+                      "status": 409,
+                      "code": "EMAIL_ALREADY_EXISTS",
+                      "detail": "Неправильні дані",
+                      "instance": "/api/auth/register"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "login",
+        "summary": "Увійти",
+        "description": "Успішний вхід встановлює HttpOnly, Secure, SameSite=Lax cookie pt_session. Сесія не має автоматичного строку завершення.",
+        "security": [],
+        "x-requirement-ids": [
+          "REQ-F-020",
+          "REQ-F-030",
+          "REQ-F-042",
+          "REQ-I-009",
+          "REQ-NF-003",
+          "REQ-NF-005"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Вхід успішний; сесію встановлено через cookie.",
+            "headers": {
+              "Set-Cookie": {
+                "$ref": "#/components/headers/SessionCookie"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "user"
+                      ],
+                      "properties": {
+                        "user": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidJson"
+          },
+          "401": {
+            "description": "Неправильна пошта або пароль.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "examples": {
+                  "invalidCredentials": {
+                    "value": {
+                      "type": "urn:pagetracker:problem:INVALID_CREDENTIALS",
+                      "title": "Неправильні дані",
+                      "status": 401,
+                      "code": "INVALID_CREDENTIALS",
+                      "detail": "Неправильні дані",
+                      "instance": "/api/auth/login"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "logout",
+        "summary": "Вийти",
+        "description": "Завершує поточну сесію; повторний виклик без активної сесії також успішний.",
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {}
+        ],
+        "x-requirement-ids": [
+          "REQ-F-029",
+          "REQ-NF-005"
+        ],
+        "responses": {
+          "204": {
+            "description": "Сесію завершено або її вже не було.",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Очищує cookie pt_session.",
+                "schema": {
+                  "type": "string",
+                  "example": "pt_session=; Path=/api; HttpOnly; Secure; SameSite=Lax; Max-Age=0"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/books": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "operationId": "listBooks",
+        "summary": "Отримати сторінку бібліотеки",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-I-004",
+          "REQ-I-015",
+          "REQ-I-016",
+          "REQ-NF-002",
+          "REQ-NF-007"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Номер сторінки; розмір сторінки фіксований — 16 книг.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Книги поточного користувача.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "pagination"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Book"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameter"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Books"
+        ],
+        "operationId": "createBook",
+        "summary": "Створити книгу",
+        "description": "Нова книга отримує статус розпочати та не має рейтингу.",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-F-002",
+          "REQ-F-004",
+          "REQ-F-024",
+          "REQ-F-026",
+          "REQ-F-027",
+          "REQ-F-042",
+          "REQ-I-010",
+          "REQ-I-011",
+          "REQ-NF-006",
+          "REQ-NF-007"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Книгу створено.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Book"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidJson"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/books/{bookId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/BookId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "operationId": "getBook",
+        "summary": "Отримати книгу",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-F-005",
+          "REQ-I-003"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Деталі книги поточного користувача.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Book"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Books"
+        ],
+        "operationId": "updateBook",
+        "summary": "Частково оновити книгу",
+        "description": "Кількість сторінок можна змінювати лише до першого запису. Рейтинг дозволено встановлювати лише для книги зі статусом прочитано. Статус обчислюється сервером і не може бути змінений напряму.",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-F-005",
+          "REQ-F-013",
+          "REQ-F-028",
+          "REQ-F-042",
+          "REQ-I-018",
+          "REQ-NF-006"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Книга оновлена.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Book"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidJson"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/StateConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Books"
+        ],
+        "operationId": "deleteBook",
+        "summary": "Видалити книгу",
+        "description": "Видаляє книгу разом з усіма записами читання.",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-F-014",
+          "REQ-F-039",
+          "REQ-I-017",
+          "REQ-NF-006"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Книгу та її записи видалено."
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/books/{bookId}/reading-records": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/BookId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Reading records"
+        ],
+        "operationId": "listReadingRecords",
+        "summary": "Отримати записи книги",
+        "description": "Без пагінації; сортування за date за зростанням, потім за startPage за зростанням.",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-F-003",
+          "REQ-F-007",
+          "REQ-I-006"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Записи читання книги.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ReadingRecord"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reading records"
+        ],
+        "operationId": "createReadingRecord",
+        "summary": "Створити запис читання",
+        "description": "Дата та кількість прочитаних сторінок обчислюються сервером. Сервер також контролює межі, перетини, безперервність і статус книги.",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-F-003",
+          "REQ-F-006",
+          "REQ-F-007",
+          "REQ-F-008",
+          "REQ-F-009",
+          "REQ-F-010",
+          "REQ-F-025",
+          "REQ-F-035",
+          "REQ-F-036",
+          "REQ-F-042",
+          "REQ-F-043",
+          "REQ-I-007",
+          "REQ-I-008",
+          "REQ-I-019",
+          "REQ-NF-002",
+          "REQ-NF-006",
+          "REQ-NF-007"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingRecordCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Запис створено.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ReadingRecord"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidJson"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/StateConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/reading-records/{recordId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RecordId"
+        }
+      ],
+      "patch": {
+        "tags": [
+          "Reading records"
+        ],
+        "operationId": "updateReadingRecord",
+        "summary": "Оновити запис читання",
+        "description": "Застосовуються правила створення запису. Дата, книга та кількість прочитаних сторінок не редагуються напряму.",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-F-006",
+          "REQ-F-008",
+          "REQ-F-009",
+          "REQ-F-010",
+          "REQ-F-011",
+          "REQ-F-032",
+          "REQ-F-034",
+          "REQ-F-036",
+          "REQ-F-039",
+          "REQ-I-013",
+          "REQ-NF-006"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingRecordPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Запис оновлено; статус книги перераховано за правилами SRS.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ReadingRecord"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidJson"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/StateConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Reading records"
+        ],
+        "operationId": "deleteReadingRecord",
+        "summary": "Видалити запис читання",
+        "description": "Видалення забороняється, якщо воно створить розрив у послідовності.",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-F-031",
+          "REQ-F-033",
+          "REQ-F-037",
+          "REQ-F-039",
+          "REQ-I-013",
+          "REQ-NF-006"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Запис видалено; статус книги перераховано за правилами SRS."
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/StateConflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/statistics": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "operationId": "getStatistics",
+        "summary": "Отримати статистику читання",
+        "description": "За відсутності параметрів повертається поточний тиждень. Тиждень починається в понеділок. Майбутні дні періоду не входять до знаменника. Межі календаря обчислюються у часовому поясі Europe/Kyiv.",
+        "x-requirement-ids": [
+          "REQ-F-001",
+          "REQ-F-015",
+          "REQ-F-016",
+          "REQ-F-017",
+          "REQ-F-018",
+          "REQ-F-038",
+          "REQ-F-040",
+          "REQ-I-005",
+          "REQ-NF-002"
+        ],
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "week"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "description": "Опорна дата періоду в часовому поясі Europe/Kyiv.",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-10-30"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Статистика періоду, у тому числі порожній стан.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Statistics"
+                    }
+                  }
+                },
+                "examples": {
+                  "withData": {
+                    "value": {
+                      "data": {
+                        "period": {
+                          "type": "week",
+                          "startDate": "2026-10-26",
+                          "endDate": "2026-11-01"
+                        },
+                        "daysCounted": 5,
+                        "pagesReadTotal": 20,
+                        "hasData": true,
+                        "averagePagesPerDay": 4
+                      }
+                    }
+                  },
+                  "empty": {
+                    "value": {
+                      "data": {
+                        "period": {
+                          "type": "week",
+                          "startDate": "2026-10-26",
+                          "endDate": "2026-11-01"
+                        },
+                        "daysCounted": 5,
+                        "pagesReadTotal": 0,
+                        "hasData": false,
+                        "averagePagesPerDay": null,
+                        "message": "Щоб побачити статистику, додайте новий запис"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некоректний параметр статистики.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "examples": {
+                  "invalidPeriod": {
+                    "value": {
+                      "type": "urn:pagetracker:problem:INVALID_PARAMETER",
+                      "title": "Некоректний параметр",
+                      "status": 400,
+                      "code": "INVALID_PARAMETER",
+                      "detail": "Період має бути week, month або year",
+                      "instance": "/api/statistics?period=day"
+                    }
+                  },
+                  "invalidDate": {
+                    "value": {
+                      "type": "urn:pagetracker:problem:INVALID_PARAMETER",
+                      "title": "Некоректний параметр",
+                      "status": 400,
+                      "code": "INVALID_PARAMETER",
+                      "detail": "Дата має бути коректною календарною датою",
+                      "instance": "/api/statistics?date=invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "SessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "pt_session",
+        "description": "Непрозоре значення сесії. Cookie має атрибути HttpOnly, Secure, SameSite=Lax та Path=/api; встановлюється успішним входом."
+      }
+    },
+    "headers": {
+      "SessionCookie": {
+        "description": "Створює cookie сесії; час автоматичного завершення не встановлюється.",
+        "schema": {
+          "type": "string",
+          "example": "pt_session=opaque-value; Path=/api; HttpOnly; Secure; SameSite=Lax"
+        }
+      }
+    },
+    "parameters": {
+      "BookId": {
+        "name": "bookId",
+        "in": "path",
+        "required": true,
+        "description": "Ідентифікатор книги; книга має належати поточному користувачу.",
+        "schema": {
+          "$ref": "#/components/schemas/Id"
+        }
+      },
+      "RecordId": {
+        "name": "recordId",
+        "in": "path",
+        "required": true,
+        "description": "Ідентифікатор запису; запис має належати поточному користувачу.",
+        "schema": {
+          "$ref": "#/components/schemas/Id"
+        }
+      }
+    },
+    "responses": {
+      "InvalidJson": {
+        "description": "Тіло запиту не є коректним JSON.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "examples": {
+              "invalidJson": {
+                "value": {
+                  "type": "urn:pagetracker:problem:INVALID_JSON",
+                  "title": "Некоректний запит",
+                  "status": 400,
+                  "code": "INVALID_JSON",
+                  "detail": "Тіло запиту має містити коректний JSON",
+                  "instance": "/api/books"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InvalidParameter": {
+        "description": "Некоректний параметр запиту.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "examples": {
+              "invalidPage": {
+                "value": {
+                  "type": "urn:pagetracker:problem:INVALID_PARAMETER",
+                  "title": "Некоректний параметр",
+                  "status": 400,
+                  "code": "INVALID_PARAMETER",
+                  "detail": "Номер сторінки має бути цілим числом від 1",
+                  "instance": "/api/books?page=invalid"
+                }
+              },
+              "invalidStatisticPeriod": {
+                "value": {
+                  "type": "urn:pagetracker:problem:INVALID_PARAMETER",
+                  "title": "Некоректний параметр",
+                  "status": 400,
+                  "code": "INVALID_PARAMETER",
+                  "detail": "Період має бути week, month або year",
+                  "instance": "/api/statistics?period=day"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AuthRequired": {
+        "description": "Немає активної автентифікованої сесії.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "examples": {
+              "missingSession": {
+                "value": {
+                  "type": "urn:pagetracker:problem:AUTH_REQUIRED",
+                  "title": "Потрібна автентифікація",
+                  "status": 401,
+                  "code": "AUTH_REQUIRED",
+                  "detail": "Увійдіть, щоб продовжити",
+                  "instance": "/api/books"
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Ресурс не знайдений або не належить поточному користувачу.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "examples": {
+              "resourceNotFound": {
+                "value": {
+                  "type": "urn:pagetracker:problem:NOT_FOUND",
+                  "title": "Ресурс не знайдено",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "detail": "Ресурс не знайдено",
+                  "instance": "/api/books/missing-book"
+                }
+              }
+            }
+          }
+        }
+      },
+      "StateConflict": {
+        "description": "Операція конфліктує з поточним станом ресурсу.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "examples": {
+              "overlappingPages": {
+                "value": {
+                  "type": "urn:pagetracker:problem:STATE_CONFLICT",
+                  "title": "Конфлікт стану",
+                  "status": 409,
+                  "code": "STATE_CONFLICT",
+                  "detail": "Ці сторінки вже прочитані",
+                  "instance": "/api/books/book-1/reading-records"
+                }
+              },
+              "skippedPages": {
+                "value": {
+                  "type": "urn:pagetracker:problem:STATE_CONFLICT",
+                  "title": "Конфлікт стану",
+                  "status": 409,
+                  "code": "STATE_CONFLICT",
+                  "detail": "Відсутні сторінки",
+                  "instance": "/api/books/book-1/reading-records"
+                }
+              },
+              "forbiddenRecordDeletion": {
+                "value": {
+                  "type": "urn:pagetracker:problem:STATE_CONFLICT",
+                  "title": "Конфлікт стану",
+                  "status": 409,
+                  "code": "STATE_CONFLICT",
+                  "detail": "Видалення заборонене",
+                  "instance": "/api/reading-records/record-1"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Значення запиту не проходять валідацію.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "examples": {
+              "invalidBook": {
+                "value": {
+                  "type": "urn:pagetracker:problem:VALIDATION_ERROR",
+                  "title": "Некоректні дані",
+                  "status": 422,
+                  "code": "VALIDATION_ERROR",
+                  "detail": "заповніть дані",
+                  "instance": "/api/books",
+                  "errors": [
+                    {
+                      "pointer": "#/title",
+                      "code": "REQUIRED",
+                      "message": "заповніть дані"
+                    }
+                  ]
+                }
+              },
+              "invalidPageRange": {
+                "value": {
+                  "type": "urn:pagetracker:problem:VALIDATION_ERROR",
+                  "title": "Некоректні дані",
+                  "status": 422,
+                  "code": "VALIDATION_ERROR",
+                  "detail": "Будь ласка, змініть сторінку",
+                  "instance": "/api/books/book-1/reading-records",
+                  "errors": [
+                    {
+                      "pointer": "#/startPage",
+                      "code": "PAGE_OUT_OF_RANGE",
+                      "message": "Будь ласка, змініть сторінку"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Технічна помилка; часткові зміни не зберігаються.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "examples": {
+              "internalError": {
+                "value": {
+                  "type": "urn:pagetracker:problem:INTERNAL_ERROR",
+                  "title": "Внутрішня помилка",
+                  "status": 500,
+                  "code": "INTERNAL_ERROR",
+                  "detail": "Помилка",
+                  "instance": "/api/statistics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "User": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "email"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Формат електронної пошти навмисно не перевіряється згідно з SRS."
+          }
+        }
+      },
+      "Book": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "author",
+          "totalPages",
+          "status",
+          "rating"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "author": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "totalPages": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "розпочати",
+              "читається",
+              "прочитано"
+            ],
+            "readOnly": true
+          },
+          "rating": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 5,
+            "description": "null, доки книга не оцінена; рейтинг дозволений лише для прочитано."
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "прочитано"
+                }
+              }
+            },
+            "then": {},
+            "else": {
+              "properties": {
+                "rating": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ReadingRecord": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "bookId",
+          "startPage",
+          "endPage",
+          "pagesRead",
+          "date"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "bookId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "startPage": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "endPage": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pagesRead": {
+            "type": "integer",
+            "minimum": 1,
+            "readOnly": true,
+            "description": "Обчислюється як endPage - startPage + 1."
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "readOnly": true,
+            "description": "Поточна дата у часовому поясі Europe/Kyiv."
+          }
+        }
+      },
+      "Period": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "startDate",
+          "endDate"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "week",
+              "month",
+              "year"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "Statistics": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "period",
+          "daysCounted",
+          "pagesReadTotal",
+          "hasData",
+          "averagePagesPerDay"
+        ],
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/Period"
+          },
+          "daysCounted": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Кількість днів періоду, що вже настали."
+          },
+          "pagesReadTotal": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hasData": {
+            "type": "boolean"
+          },
+          "averagePagesPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Округлене середнє; null, якщо немає записів у періоді."
+          },
+          "message": {
+            "type": "string",
+            "const": "Щоб побачити статистику, додайте новий запис",
+            "description": "Повертається лише якщо hasData дорівнює false."
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "hasData": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "averagePagesPerDay": {
+                  "type": "integer"
+                }
+              },
+              "not": {
+                "required": [
+                  "message"
+                ]
+              }
+            },
+            "else": {
+              "properties": {
+                "averagePagesPerDay": {
+                  "type": "null"
+                },
+                "message": {
+                  "const": "Щоб побачити статистику, додайте новий запис"
+                }
+              },
+              "required": [
+                "message"
+              ]
+            }
+          }
+        ]
+      },
+      "Pagination": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "page",
+          "pageSize",
+          "totalItems",
+          "totalPages"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "const": 16
+          },
+          "totalItems": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalPages": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "Credentials": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "writeOnly": true
+          }
+        }
+      },
+      "BookCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "author",
+          "totalPages"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "author": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "totalPages": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "BookPatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "author": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "totalPages": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          }
+        }
+      },
+      "ReadingRecordCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "startPage",
+          "endPage"
+        ],
+        "properties": {
+          "startPage": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "endPage": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "ReadingRecordPatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "startPage": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "endPage": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "detail",
+          "instance"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "integer",
+            "enum": [
+              400,
+              401,
+              404,
+              409,
+              422,
+              500
+            ]
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "INVALID_JSON",
+              "INVALID_PARAMETER",
+              "AUTH_REQUIRED",
+              "INVALID_CREDENTIALS",
+              "EMAIL_ALREADY_EXISTS",
+              "NOT_FOUND",
+              "STATE_CONFLICT",
+              "VALIDATION_ERROR",
+              "INTERNAL_ERROR"
+            ]
+          },
+          "detail": {
+            "type": "string",
+            "minLength": 1
+          },
+          "instance": {
+            "type": "string",
+            "minLength": 1
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "pointer",
+                "code",
+                "message"
+              ],
+              "properties": {
+                "pointer": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
