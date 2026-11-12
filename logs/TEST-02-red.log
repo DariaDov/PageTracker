@@ -1,0 +1,170 @@
+✖ TEST-02 / REQ-F-019, REQ-F-022, REQ-F-023, REQ-F-041: registration creates a public account without starting a session (0.950732ms)
+✖ TEST-02 / REQ-F-021: email uniqueness is case-sensitive (0.235512ms)
+✖ TEST-02 / REQ-F-042: missing and whitespace-only credentials are rejected without storing an account (0.224481ms)
+✖ TEST-02 / REQ-F-030, API-CL-08: duplicate exact email returns the approved conflict without a second account (0.221124ms)
+✖ TEST-02 / API-CL-05, API-CL-06: malformed JSON returns the shared 400 problem response without mutation (0.222347ms)
+✖ TEST-02 / API-CL-09: unknown request fields are rejected without mutation (0.216556ms)
+✖ TEST-02 / OpenAPI 500: storage failure returns a safe problem response without partial account data (0.228919ms)
+✖ TEST-02 / action logging: successful and rejected registration requests are logged without credentials (0.234901ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 0
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 55.350733
+
+✖ failing tests:
+
+test at tests/test-02-registration.test.js:92:1
+✖ TEST-02 / REQ-F-019, REQ-F-022, REQ-F-023, REQ-F-041: registration creates a public account without starting a session (0.950732ms)
+  Error: Cannot find module '../src/api/server.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-02-registration.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at startApi (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:49:31)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:93:32) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js' ]
+  }
+
+test at tests/test-02-registration.test.js:110:1
+✖ TEST-02 / REQ-F-021: email uniqueness is case-sensitive (0.235512ms)
+  Error: Cannot find module '../src/api/server.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-02-registration.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at startApi (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:49:31)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:111:32) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js' ]
+  }
+
+test at tests/test-02-registration.test.js:124:1
+✖ TEST-02 / REQ-F-042: missing and whitespace-only credentials are rejected without storing an account (0.224481ms)
+  Error: Cannot find module '../src/api/server.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-02-registration.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at startApi (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:49:31)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:125:32) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js' ]
+  }
+
+test at tests/test-02-registration.test.js:142:1
+✖ TEST-02 / REQ-F-030, API-CL-08: duplicate exact email returns the approved conflict without a second account (0.221124ms)
+  Error: Cannot find module '../src/api/server.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-02-registration.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at startApi (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:49:31)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:143:32) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js' ]
+  }
+
+test at tests/test-02-registration.test.js:155:1
+✖ TEST-02 / API-CL-05, API-CL-06: malformed JSON returns the shared 400 problem response without mutation (0.222347ms)
+  Error: Cannot find module '../src/api/server.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-02-registration.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at startApi (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:49:31)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:156:32) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js' ]
+  }
+
+test at tests/test-02-registration.test.js:165:1
+✖ TEST-02 / API-CL-09: unknown request fields are rejected without mutation (0.216556ms)
+  Error: Cannot find module '../src/api/server.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-02-registration.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at startApi (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:49:31)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:166:32) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js' ]
+  }
+
+test at tests/test-02-registration.test.js:178:1
+✖ TEST-02 / OpenAPI 500: storage failure returns a safe problem response without partial account data (0.228919ms)
+  Error: Cannot find module '../src/api/server.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-02-registration.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at startApi (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:49:31)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:184:25) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js' ]
+  }
+
+test at tests/test-02-registration.test.js:199:1
+✖ TEST-02 / action logging: successful and rejected registration requests are logged without credentials (0.234901ms)
+  Error: Cannot find module '../src/api/server.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-02-registration.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at startApi (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:49:31)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js:202:25) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-02-registration.test.js' ]
+  }

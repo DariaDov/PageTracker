@@ -1,0 +1,7 @@
+2026-11-12 | TEST-GATE-02 | APPROVED by human
+Test suite: tests/test-02-registration.test.js
+Scope: REQ-F-019, REQ-F-021, REQ-F-022, REQ-F-023, REQ-F-030, REQ-F-041, REQ-F-042; API-CL-05, API-CL-06, API-CL-08, API-CL-09; OpenAPI registration 400/409/422/500 responses; action logging without secrets.
+Scenarios: successful public registration without session; non-empty short password and non-email-formatted address; case-sensitive email uniqueness; missing/whitespace-only fields; exact duplicate email; malformed JSON; unknown request field; storage failure without partial account or internal diagnostic leakage; logging success and rejected outcomes without credentials.
+Test integration contract approved by human: createApiServer({ store, logger }) returns a Node.js HTTP server.
+Red baseline: 8 tests, 0 passed, 8 failed, 0 skipped. All failed because src/api/server.js is not implemented (MODULE_NOT_FOUND).
+Gate authorizes implementation of registration behavior only after tests; it does not close GATE-02 or imply VAL-02.
