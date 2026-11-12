@@ -1,0 +1,145 @@
+✖ TEST-03 / REQ-F-020, REQ-I-009, REQ-NF-003, REQ-NF-005: successful login returns public user and persistent secure session cookie (91.997905ms)
+✖ TEST-03 / REQ-F-030: unknown email and wrong password produce indistinguishable login failures without a cookie (53.278612ms)
+✖ TEST-03 / REQ-F-001, REQ-NF-005: protected resources reject absent and unknown sessions (6.693363ms)
+✖ TEST-03 / REQ-F-001: authenticated users can list and read only their own books (102.015387ms)
+✖ TEST-03 / REQ-F-029, REQ-NF-005, API-CL-04: logout invalidates session, clears cookie, and is idempotent (48.053254ms)
+✖ TEST-03 / action logging: authentication logs do not include passwords or session tokens (40.588182ms)
+✖ TEST-03 / session storage: raw session tokens are never used as stored keys (38.758689ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 0
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 449.894671
+
+✖ failing tests:
+
+test at tests/test-03-access.test.js:151:1
+✖ TEST-03 / REQ-F-020, REQ-I-009, REQ-NF-003, REQ-NF-005: successful login returns public user and persistent secure session cookie (91.997905ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  404 !== 200
+  
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-03-access.test.js:158:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test-03-access.test.js:175:1
+✖ TEST-03 / REQ-F-030: unknown email and wrong password produce indistinguishable login failures without a cookie (53.278612ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  404 !== 401
+  
+      at assertProblem (/home/daria/ПІС/PageTracker/tests/test-03-access.test.js:140:10)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-03-access.test.js:183:32)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 401,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test-03-access.test.js:193:1
+✖ TEST-03 / REQ-F-001, REQ-NF-005: protected resources reject absent and unknown sessions (6.693363ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  404 !== 401
+  
+      at assertProblem (/home/daria/ПІС/PageTracker/tests/test-03-access.test.js:140:10)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-03-access.test.js:206:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 401,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test-03-access.test.js:210:1
+✖ TEST-03 / REQ-F-001: authenticated users can list and read only their own books (102.015387ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  404 !== 200
+  
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-03-access.test.js:221:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test-03-access.test.js:248:1
+✖ TEST-03 / REQ-F-029, REQ-NF-005, API-CL-04: logout invalidates session, clears cookie, and is idempotent (48.053254ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  404 !== 200
+  
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-03-access.test.js:254:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test-03-access.test.js:272:1
+✖ TEST-03 / action logging: authentication logs do not include passwords or session tokens (40.588182ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  404 !== 200
+  
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-03-access.test.js:280:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test-03-access.test.js:296:1
+✖ TEST-03 / session storage: raw session tokens are never used as stored keys (38.758689ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  404 !== 200
+  
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-03-access.test.js:302:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,8 @@
+2026-11-12 | TEST-GATE-03 | APPROVED by human
+Test suite: tests/test-03-access.test.js
+Scope: REQ-F-001, REQ-F-020, REQ-F-029, REQ-F-030, REQ-NF-003, REQ-NF-005; API-CL-03, API-CL-04; OpenAPI login, logout, and protected book access.
+Scenarios: successful login and persistent Secure/HttpOnly/SameSite=Lax cookie; same 401 for unknown email and wrong password; absent/unknown session rejected; A can access only A's books and cannot read/update B's book; logout invalidates session, clears cookie, and is idempotent; session secrets excluded from logs; raw tokens not stored.
+Test integration contract: createApiServer({ store, logger }); store.sessions.create({ userId, tokenHash }), findByTokenHash(tokenHash), deleteByTokenHash(tokenHash).
+Red baseline: 7 tests, 0 passed, 7 failed, 0 skipped. Failures are expected because login/logout/protected-resource routes are not implemented and currently return 404.
+Human approval authorizes FEAT-03 implementation after committing the red stage. VER-03, VAL-03, and GATE-03 remain pending.
+Commit workflow per human direction: create separate red-stage and green-stage commits for each TEST, including all new files and changes belonging to that stage.
