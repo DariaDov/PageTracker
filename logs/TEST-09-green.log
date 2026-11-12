@@ -1,0 +1,10 @@
+2026-11-12 | TEST-09 | GREEN
+Command: node --test tests/test-09-reading-record-management.test.js
+Result: 11 tests, 11 passed, 0 failed, 0 skipped.
+Related regression: node --test tests/test-06-book-details.test.js tests/test-07-reading-entry.test.js tests/test-08-reading-rules.test.js
+Related regression result: 40 tests, 39 passed, 0 failed, 1 skipped. The single skip is the TEST-06 PostgreSQL acceptance test requiring TEST_DATABASE_URL.
+Full regression command: npm test
+Full regression result: 86 tests, 83 passed, 0 failed, 3 skipped.
+Skip analysis: two TEST-01 and one TEST-06 PostgreSQL acceptance tests require TEST_DATABASE_URL, unavailable in this execution environment. TEST-GATE-09 records that the user declined adding a conditional PostgreSQL integration test and intends to run database tests in their terminal.
+Output review: TEST-09 list ordering and owner isolation; record update validation, derived pages and completion; delete confirmation, gap protection and status recalculation; transactional failure handling; action-log privacy; and book-details controls passed. All executed tests from TEST-01 through TEST-09 passed.
+Worktree review: git diff --check passed. Existing unrelated changes in spec/traceability-matrix.md and untracked node_modules/ were left untouched.

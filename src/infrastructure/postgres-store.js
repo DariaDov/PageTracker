@@ -220,6 +220,38 @@ function createRepositories(queryable) {
         );
         return rows.map(mapReadingRecord);
       },
+      async findByIdForUserForUpdate(recordId, userId) {
+        const { rows } = await queryable.query(
+          `SELECT r.id, r.book_id, r.start_page, r.end_page, r.pages_read, r.date
+           FROM reading_records AS r
+           JOIN books AS b ON b.id = r.book_id
+           WHERE r.id = $1 AND b.user_id = $2
+           FOR UPDATE OF r`,
+          [recordId, userId],
+        );
+        return rows[0] ? mapReadingRecord(rows[0]) : null;
+      },
+      async updateForUser(recordId, userId, { startPage, endPage }) {
+        const { rows } = await queryable.query(
+          `UPDATE reading_records AS r
+           SET start_page = $3, end_page = $4, pages_read = $4 - $3 + 1
+           FROM books AS b
+           WHERE r.id = $1 AND b.id = r.book_id AND b.user_id = $2
+           RETURNING r.id, r.book_id, r.start_page, r.end_page, r.pages_read, r.date`,
+          [recordId, userId, startPage, endPage],
+        );
+        return rows[0] ? mapReadingRecord(rows[0]) : null;
+      },
+      async deleteForUser(recordId, userId) {
+        const { rows } = await queryable.query(
+          `DELETE FROM reading_records AS r
+           USING books AS b
+           WHERE r.id = $1 AND b.id = r.book_id AND b.user_id = $2
+           RETURNING r.id, r.book_id, r.start_page, r.end_page, r.pages_read, r.date`,
+          [recordId, userId],
+        );
+        return rows[0] ? mapReadingRecord(rows[0]) : null;
+      },
     },
   };
 }

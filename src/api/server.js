@@ -178,6 +178,30 @@ function validateReadingRecordShape(body) {
   return body;
 }
 
+function validateReadingRecordPatchShape(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані');
+  }
+  const fields = Object.keys(body);
+  if (fields.length === 0) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані');
+  }
+  const unknownFields = fields.filter((field) => !ALLOWED_READING_RECORD_FIELDS.has(field));
+  if (unknownFields.length > 0) {
+    throw new ApiProblem(
+      400,
+      'INVALID_PARAMETER',
+      'Bad Request',
+      'Невідоме поле запиту',
+      unknownFields.map((field) => ({
+        pointer: `/${field}`,
+        code: 'unknown_field',
+        message: 'Невідоме поле запиту',
+      })),
+    );
+  }
+}
+
 function validateReadingRecordRange(payload, book) {
   const { startPage, endPage } = payload;
   if (
@@ -202,6 +226,26 @@ function validateReadingRecordRange(payload, book) {
       'Unprocessable Content',
       'Кінцева сторінка, менша за початкову',
     );
+  }
+}
+
+function validateReadingRecordSequence(candidate, records) {
+  if (records.some(
+    (record) => candidate.startPage <= record.endPage && candidate.endPage >= record.startPage,
+  )) {
+    throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Ці сторінки вже прочитані');
+  }
+
+  const ordered = [...records, candidate].sort(
+    (left, right) => left.startPage - right.startPage || left.endPage - right.endPage,
+  );
+  if (ordered[0]?.startPage !== 1) {
+    throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Відсутні сторінки');
+  }
+  for (let index = 1; index < ordered.length; index += 1) {
+    if (ordered[index].startPage !== ordered[index - 1].endPage + 1) {
+      throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Відсутні сторінки');
+    }
   }
 }
 
@@ -358,6 +402,7 @@ async function handleRequest(request, response, { store, logger }) {
   const url = new URL(request.url, 'http://localhost');
   const pathname = url.pathname;
   const readingRecordsPath = pathname.match(/^\/api\/books\/([^/]+)\/reading-records$/);
+  const readingRecordPath = pathname.match(/^\/api\/reading-records\/([^/]+)$/);
   let status = 500;
   let outcome = 'failure';
   let body;
@@ -417,6 +462,25 @@ async function handleRequest(request, response, { store, logger }) {
       outcome = 'success';
       noContent = true;
       responseHeaders['set-cookie'] = clearedSessionCookie();
+    } else if (readingRecordsPath && request.method === 'GET') {
+      action = 'reading-records.list';
+      const user = await authenticateRequest(request, store);
+      actorId = user.id;
+      const book = await store.books.findByIdForUser(readingRecordsPath[1], user.id);
+      if (!book) {
+        throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+      }
+      const records = (await store.readingRecords.listByUser(user.id))
+        .filter((record) => record.bookId === book.id)
+        .sort(
+          (left, right) =>
+            left.date.localeCompare(right.date) ||
+            left.startPage - right.startPage ||
+            left.id.localeCompare(right.id),
+        );
+      status = 200;
+      outcome = 'success';
+      body = { data: records.map(publicReadingRecord) };
     } else if (readingRecordsPath && request.method === 'POST') {
       action = 'reading-records.create';
       const user = await authenticateRequest(request, store);
@@ -471,6 +535,105 @@ async function handleRequest(request, response, { store, logger }) {
       status = 201;
       outcome = 'success';
       body = { data: publicReadingRecord(record) };
+    } else if (readingRecordPath && ['PATCH', 'DELETE'].includes(request.method)) {
+      action = request.method === 'PATCH' ? 'reading-records.update' : 'reading-records.delete';
+      const user = await authenticateRequest(request, store);
+      actorId = user.id;
+
+      if (request.method === 'PATCH') {
+        const changes = await readJsonBody(request);
+        validateReadingRecordPatchShape(changes);
+        const record = await store.transaction(async (repositories) => {
+          const current = await repositories.readingRecords.findByIdForUserForUpdate(
+            readingRecordPath[1],
+            user.id,
+          );
+          if (!current) {
+            throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+          }
+          const book = await repositories.books.findByIdForUserForUpdate(current.bookId, user.id);
+          if (!book) {
+            throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+          }
+          if (book.status !== 'читається') {
+            throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Запис не можна редагувати');
+          }
+
+          const candidate = { ...current, ...changes };
+          validateReadingRecordRange(candidate, book);
+          const otherRecords = (await repositories.readingRecords.listByUser(user.id))
+            .filter((item) => item.bookId === book.id && item.id !== current.id);
+          validateReadingRecordSequence(candidate, otherRecords);
+
+          const updatedRecord = await repositories.readingRecords.updateForUser(
+            current.id,
+            user.id,
+            { startPage: candidate.startPage, endPage: candidate.endPage },
+          );
+          if (!updatedRecord) {
+            throw new Error('Reading record disappeared during update');
+          }
+          const nextStatus = candidate.endPage === book.totalPages ? 'прочитано' : 'читається';
+          const updatedBook = await repositories.books.updateStatusForUser(
+            book.id,
+            user.id,
+            nextStatus,
+          );
+          if (!updatedBook) {
+            throw new Error('Book disappeared during reading-record update');
+          }
+          return updatedRecord;
+        });
+        status = 200;
+        outcome = 'success';
+        body = { data: publicReadingRecord(record) };
+      } else {
+        await store.transaction(async (repositories) => {
+          const current = await repositories.readingRecords.findByIdForUserForUpdate(
+            readingRecordPath[1],
+            user.id,
+          );
+          if (!current) {
+            throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+          }
+          const book = await repositories.books.findByIdForUserForUpdate(current.bookId, user.id);
+          if (!book) {
+            throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+          }
+          if (book.status !== 'читається') {
+            throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Запис не можна видалити');
+          }
+
+          const bookRecords = (await repositories.readingRecords.listByUser(user.id))
+            .filter((item) => item.bookId === book.id);
+          const isLastRecord = bookRecords.every(
+            (item) => item.id === current.id || item.endPage <= current.endPage,
+          );
+          if (!isLastRecord) {
+            throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Видалення заборонене');
+          }
+          const deletedRecord = await repositories.readingRecords.deleteForUser(
+            current.id,
+            user.id,
+          );
+          if (!deletedRecord) {
+            throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+          }
+          if (bookRecords.length === 1) {
+            const updatedBook = await repositories.books.updateStatusForUser(
+              book.id,
+              user.id,
+              'розпочати',
+            );
+            if (!updatedBook) {
+              throw new Error('Book disappeared during reading-record deletion');
+            }
+          }
+        });
+        status = 204;
+        outcome = 'success';
+        noContent = true;
+      }
     } else if (
       (pathname === '/api/books' && ['GET', 'POST'].includes(request.method)) ||
       (/^\/api\/books\/[^/]+$/.test(pathname) && ['GET', 'PATCH'].includes(request.method))

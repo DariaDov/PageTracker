@@ -67,6 +67,9 @@ function createMemoryStore({ failRecordUpdate = false, failRecordDelete = false 
       },
     },
     books: {
+      async findByIdForUser(bookId, userId) {
+        return books.find((book) => book.id === bookId && book.userId === userId) ?? null;
+      },
       async findByIdForUserForUpdate(bookId, userId) {
         return books.find((book) => book.id === bookId && book.userId === userId) ?? null;
       },
@@ -86,6 +89,9 @@ function createMemoryStore({ failRecordUpdate = false, failRecordDelete = false 
         );
       },
       async findByIdForUser(recordId, userId) {
+        return getOwnedRecord(recordId, userId);
+      },
+      async findByIdForUserForUpdate(recordId, userId) {
         return getOwnedRecord(recordId, userId);
       },
       async updateForUser(recordId, userId, changes) {
@@ -253,6 +259,9 @@ test('TEST-09 / REQ-F-011, REQ-F-032: editing a reading record recalculates page
   });
   assert.equal(store.bookRows[0].status, 'прочитано');
   assert.equal(logger.events.at(-1).action, 'reading-records.update');
+  assert.equal(logger.events.at(-1).status, 200);
+  assert.equal(Object.hasOwn(logger.events.at(-1), 'startPage'), false);
+  assert.equal(Object.hasOwn(logger.events.at(-1), 'endPage'), false);
 });
 
 test('TEST-09 / REQ-F-034, REQ-F-036: invalid record edits reject gaps, overlaps, and out-of-range pages without mutation', async (t) => {
@@ -279,17 +288,50 @@ test('TEST-09 / REQ-F-034, REQ-F-036: invalid record edits reject gaps, overlaps
     'VALIDATION_ERROR',
     'Будь ласка, змініть сторінку',
   );
+  await assertProblem(
+    await request(baseUrl, '/reading-records/record-b', 'PATCH', {}),
+    422,
+    'VALIDATION_ERROR',
+  );
+  await assertProblem(
+    await request(baseUrl, '/reading-records/record-b', 'PATCH', { date: '2026-11-13' }),
+    400,
+    'INVALID_PARAMETER',
+  );
   assert.deepEqual(store.recordRows, original);
   assert.equal(store.bookRows[0].status, 'читається');
 });
 
+test('TEST-09 / REQ-F-001: record edits and deletes require authentication and ownership', async (t) => {
+  const { baseUrl, store } = await startApi(t);
+  store.seedRecord({ id: 'record-a', startPage: 1, endPage: 10 });
+
+  for (const [method, body] of [['PATCH', { endPage: 12 }], ['DELETE', undefined]]) {
+    const unauthenticated = await fetch(`${baseUrl}/reading-records/record-a`, {
+      method,
+      ...(body === undefined
+        ? {}
+        : { headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),
+    });
+    await assertProblem(unauthenticated, 401, 'AUTH_REQUIRED');
+    await assertProblem(
+      await request(baseUrl, '/reading-records/record-a', method, body, 'session-b'),
+      404,
+      'NOT_FOUND',
+    );
+  }
+  assert.equal(store.recordRows[0].endPage, 10);
+  assert.equal(store.recordRows.length, 1);
+});
+
 test('TEST-09 / REQ-F-011: only books currently being read may have records edited', async (t) => {
   const { baseUrl, store } = await startApi(t);
-  store.seedRecord({ id: 'record-a', startPage: 1, endPage: 10, bookId: 'book-b' });
+  store.bookRows[0].status = 'прочитано';
+  store.seedRecord({ id: 'record-a', startPage: 1, endPage: 30 });
   const completed = await request(baseUrl, '/reading-records/record-a', 'PATCH', { endPage: 11 });
   await assertProblem(completed, 409, 'STATE_CONFLICT');
-  assert.equal(store.recordRows[0].endPage, 10);
-  assert.equal(store.bookRows[1].status, 'прочитано');
+  assert.equal(store.recordRows[0].endPage, 30);
+  assert.equal(store.bookRows[0].status, 'прочитано');
 });
 
 test('TEST-09 / REQ-F-031, REQ-F-037: deleting a middle record is rejected when it would leave a page gap', async (t) => {
@@ -312,11 +354,15 @@ test('TEST-09 / REQ-F-031, REQ-F-037: deleting a middle record is rejected when 
 });
 
 test('TEST-09 / REQ-F-033: deleting the sole record resets status; deleting the latest of several preserves reading status', async (t) => {
-  const { baseUrl, store } = await startApi(t);
+  const { baseUrl, store, logger } = await startApi(t);
   store.seedRecord({ id: 'record-only', startPage: 1, endPage: 10 });
 
   const onlyDelete = await request(baseUrl, '/reading-records/record-only', 'DELETE');
   assert.equal(onlyDelete.status, 204);
+  assert.equal(logger.events.at(-1).action, 'reading-records.delete');
+  assert.equal(logger.events.at(-1).status, 204);
+  assert.equal(logger.events.at(-1).outcome, 'success');
+  assert.equal(Object.hasOwn(logger.events.at(-1), 'recordId'), false);
   assert.equal(store.recordRows.length, 0);
   assert.equal(store.bookRows[0].status, 'розпочати');
 
@@ -430,9 +476,12 @@ test('TEST-09 / REQ-I-006, REQ-I-013: book details sort records and provide edit
   let confirmationMessage;
   global.confirm = (message) => {
     confirmationMessage = message;
-    return true;
+    return false;
   };
   try {
+    deleteButton.props.onClick({ preventDefault() {} });
+    assert.deepEqual(deletions, []);
+    global.confirm = () => true;
     deleteButton.props.onClick({ preventDefault() {} });
   } finally {
     if (originalConfirm === undefined) {

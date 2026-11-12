@@ -2,7 +2,7 @@
 
 const React = require('react');
 
-function BookDetails({ book, records, onUpdate, onRate }) {
+function BookDetails({ book, records, onUpdate, onRate, onUpdateRecord, onDeleteRecord }) {
   function submitMetadata(event) {
     event.preventDefault();
     const { title, author } = event.currentTarget.elements;
@@ -14,6 +14,22 @@ function BookDetails({ book, records, onUpdate, onRate }) {
     const { totalPages } = event.currentTarget.elements;
     onUpdate({ totalPages: Number(totalPages.value) });
   }
+
+  function submitRecordUpdate(event, record) {
+    event.preventDefault();
+    const { startPage, endPage } = event.currentTarget.elements;
+    onUpdateRecord(record.id, {
+      startPage: Number(startPage.value),
+      endPage: Number(endPage.value),
+    });
+  }
+
+  const orderedRecords = [...records].sort(
+    (left, right) =>
+      left.date.localeCompare(right.date) ||
+      left.startPage - right.startPage ||
+      left.id.localeCompare(right.id),
+  );
 
   return React.createElement(
     'article',
@@ -100,12 +116,67 @@ function BookDetails({ book, records, onUpdate, onRate }) {
       ? React.createElement(
           'ul',
           null,
-          records.map((record) =>
+          orderedRecords.map((record) =>
             React.createElement(
               'li',
               { key: record.id },
               React.createElement('time', { dateTime: record.date }, record.date),
               ` — ${record.pagesRead} сторінок`,
+              book.status === 'читається'
+                ? React.createElement(
+                    React.Fragment,
+                    null,
+                    React.createElement(
+                      'form',
+                      {
+                        'data-form': 'reading-record',
+                        'data-record-id': record.id,
+                        onSubmit: (event) => submitRecordUpdate(event, record),
+                      },
+                      React.createElement(
+                        'label',
+                        null,
+                        'Початкова сторінка',
+                        React.createElement('input', {
+                          name: 'startPage',
+                          type: 'number',
+                          min: 1,
+                          step: 1,
+                          defaultValue: record.startPage,
+                          required: true,
+                        }),
+                      ),
+                      React.createElement(
+                        'label',
+                        null,
+                        'Кінцева сторінка',
+                        React.createElement('input', {
+                          name: 'endPage',
+                          type: 'number',
+                          min: 1,
+                          step: 1,
+                          defaultValue: record.endPage,
+                          required: true,
+                        }),
+                      ),
+                      React.createElement('button', { type: 'submit' }, 'Зберегти запис'),
+                    ),
+                    React.createElement(
+                      'button',
+                      {
+                        type: 'button',
+                        'data-delete-record': record.id,
+                        onClick: (event) => {
+                          event.preventDefault();
+                          if (globalThis.confirm('Ви хочете видалити цей запис')) {
+                            onDeleteRecord(record.id);
+                          }
+                        },
+                      },
+                      'Видалити запис',
+                    ),
+                  )
+                : null,
             ),
           ),
         )
