@@ -1,0 +1,8 @@
+2026-11-12 | TEST-GATE-04 | APPROVED by human
+Test suite: tests/test-04-navigation.test.js
+Scope: REQ-I-002 and REQ-I-012; FEAT-04 authenticated navigation shell.
+Scenarios: Ukrainian navigation labels and accessible name; approved routes /, /books, /statistics; logout represented as a button; authenticated page content rendered by shared shell.
+Test strategy: React + ReactDOM server-side rendering. Route mapping and logout button contract approved by human.
+Red baseline: 3 tests, 0 passed, 3 failed, 0 skipped. All failures are MODULE_NOT_FOUND for the unimplemented src/ui/AuthenticatedLayout.js component.
+Gate authorizes implementation after the TEST-04 red-stage commit; VER-04, VAL-04, and project GATE-04 remain pending.
+Commit workflow per human direction: separate red-stage and green-stage commits for each TEST.
