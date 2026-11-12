@@ -153,6 +153,31 @@ function createRepositories(queryable) {
         );
         return rows[0] ? mapBook(rows[0]) : null;
       },
+      async updateForUser(bookId, userId, changes) {
+        const columns = {
+          title: 'title',
+          author: 'author',
+          totalPages: 'total_pages',
+          rating: 'rating',
+        };
+        const entries = Object.entries(changes);
+        const assignments = entries.map(
+          ([field], index) => `${columns[field]} = $${index + 3}`,
+        );
+        const values = entries.map(([, value]) => value);
+        const pageCountIsUnchanged = !Object.hasOwn(changes, 'totalPages');
+        const { rows } = await queryable.query(
+          `UPDATE books
+           SET ${assignments.join(', ')}
+           WHERE id = $1 AND user_id = $2
+             AND ($${values.length + 3}::boolean OR NOT EXISTS (
+               SELECT 1 FROM reading_records WHERE book_id = $1
+             ))
+           RETURNING id, user_id, title, author, total_pages, status, rating`,
+          [bookId, userId, ...values, pageCountIsUnchanged],
+        );
+        return rows[0] ? mapBook(rows[0]) : null;
+      },
     },
     readingRecords: {
       async create({ bookId, startPage, endPage, date }) {

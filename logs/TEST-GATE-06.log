@@ -5,3 +5,6 @@ API coverage: authenticated GET details; missing/foreign resource indistinguisha
 UI coverage: server-rendered details show book metadata, status, rating, and records; metadata/page-count editing uses callbacks; rating control exists only for completed books. Reading record CRUD/sorting remains out of scope for TEST-06.
 TDD gate: add and run tests before implementation; record corrected expected red results before coding.
 Red verification: 17 tests, 2 passed, 15 failed, 0 skipped. The two passing existing behaviors are session enforcement and the indistinguishable 404 for foreign/missing books.
+2026-11-12 | VAL-06 / GATE-06 | APPROVED by human after verification
+Verification: TEST-06 API/UI suite passed 17/17; user-run PostgreSQL-enabled TEST-06 suite passed 18/18. Full regression in the assistant process passed 50 tests, failed 0, skipped 3 (TEST_DATABASE_URL unavailable there).
+Decision: accept TEST-06 implementation and authorize its separate green-stage commit.

@@ -470,3 +470,66 @@ test('TEST-06 / REQ-F-005: completed-book rating selection calls the rating call
   ratingSelect.props.onChange({ currentTarget: { value: '5' } });
   assert.deepEqual(ratings, [5]);
 });
+
+test(
+  'TEST-06 / PostgreSQL: page-count update persists and is blocked after a reading record',
+  { skip: process.env.TEST_DATABASE_URL ? false : 'Set TEST_DATABASE_URL to run PostgreSQL acceptance tests.' },
+  async () => {
+    const { createPostgresStore } = require('../src/infrastructure/postgres-store.js');
+    const store = await createPostgresStore({
+      connectionString: process.env.TEST_DATABASE_URL,
+    });
+    let reopenedStore;
+    let user;
+
+    try {
+      await store.migrate();
+      user = await store.users.create({
+        email: `test-06-${randomUUID()}@example.test`,
+        passwordHash: 'integration-test-hash',
+      });
+      const book = await store.books.create({
+        userId: user.id,
+        title: 'TEST-06 persistence',
+        author: 'Integration test',
+        totalPages: 100,
+      });
+
+      const updated = await store.books.updateForUser(book.id, user.id, {
+        title: 'TEST-06 persisted',
+        totalPages: 120,
+      });
+      assert.equal(updated.title, 'TEST-06 persisted');
+      assert.equal(updated.totalPages, 120);
+
+      await store.readingRecords.create({
+        bookId: book.id,
+        startPage: 1,
+        endPage: 10,
+        date: '2026-11-12',
+      });
+      const blocked = await store.books.updateForUser(book.id, user.id, {
+        totalPages: 130,
+      });
+      assert.equal(blocked, null);
+
+      reopenedStore = await createPostgresStore({
+        connectionString: process.env.TEST_DATABASE_URL,
+      });
+      const persisted = await reopenedStore.books.findByIdForUser(book.id, user.id);
+      assert.equal(persisted.title, 'TEST-06 persisted');
+      assert.equal(persisted.totalPages, 120);
+    } finally {
+      try {
+        if (user) {
+          await (reopenedStore ?? store).users.deleteById(user.id);
+        }
+      } finally {
+        if (reopenedStore) {
+          await reopenedStore.close();
+        }
+        await store.close();
+      }
+    }
+  },
+);

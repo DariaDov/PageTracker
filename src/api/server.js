@@ -12,6 +12,7 @@ const LOGOUT_PATH = '/api/auth/logout';
 const SESSION_COOKIE = 'pt_session';
 const ALLOWED_REGISTRATION_FIELDS = new Set(['email', 'password']);
 const ALLOWED_BOOK_FIELDS = new Set(['title', 'author', 'totalPages']);
+const ALLOWED_BOOK_PATCH_FIELDS = new Set(['title', 'author', 'totalPages', 'rating']);
 
 class ApiProblem extends Error {
   constructor(status, code, title, detail, errors) {
@@ -94,6 +95,49 @@ function validateBookShape(body) {
   }
   if (!Number.isInteger(body.totalPages) || body.totalPages < 1) {
     errors.push({ pointer: '/totalPages', code: 'minimum', message: 'заповніть дані' });
+  }
+  if (errors.length > 0) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані', errors);
+  }
+}
+
+function validateBookPatchShape(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані');
+  }
+
+  const fields = Object.keys(body);
+  if (fields.length === 0) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані');
+  }
+
+  const unknownFields = fields.filter((field) => !ALLOWED_BOOK_PATCH_FIELDS.has(field));
+  if (unknownFields.length > 0) {
+    throw new ApiProblem(
+      400,
+      'INVALID_PARAMETER',
+      'Bad Request',
+      'Невідоме поле запиту',
+      unknownFields.map((field) => ({
+        pointer: `/${field}`,
+        code: 'unknown_field',
+        message: 'Невідоме поле запиту',
+      })),
+    );
+  }
+
+  const errors = [];
+  if ('title' in body && (typeof body.title !== 'string' || body.title.trim().length === 0)) {
+    errors.push({ pointer: '/title', code: 'required', message: 'заповніть дані' });
+  }
+  if ('author' in body && (typeof body.author !== 'string' || body.author.trim().length === 0)) {
+    errors.push({ pointer: '/author', code: 'required', message: 'заповніть дані' });
+  }
+  if ('totalPages' in body && (!Number.isInteger(body.totalPages) || body.totalPages < 1)) {
+    errors.push({ pointer: '/totalPages', code: 'minimum', message: 'заповніть дані' });
+  }
+  if ('rating' in body && (!Number.isInteger(body.rating) || body.rating < 1 || body.rating > 5)) {
+    errors.push({ pointer: '/rating', code: 'range', message: 'заповніть дані' });
   }
   if (errors.length > 0) {
     throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані', errors);
@@ -347,11 +391,31 @@ async function handleRequest(request, response, { store, logger }) {
           throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
         }
         if (request.method === 'PATCH') {
-          throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+          const changes = await readJsonBody(request);
+          validateBookPatchShape(changes);
+
+          if ('totalPages' in changes) {
+            const records = await store.readingRecords.listByUser(user.id);
+            if (records.some((record) => record.bookId === book.id)) {
+              throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Кількість сторінок не можна змінити після початку читання');
+            }
+          }
+          if ('rating' in changes && book.status !== 'прочитано') {
+            throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Рейтинг доступний лише для прочитаної книги');
+          }
+
+          const updatedBook = await store.books.updateForUser(book.id, user.id, changes);
+          if (!updatedBook) {
+            throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+          }
+          status = 200;
+          outcome = 'success';
+          body = { data: publicBook(updatedBook) };
+        } else {
+          status = 200;
+          outcome = 'success';
+          body = { data: publicBook(book) };
         }
-        status = 200;
-        outcome = 'success';
-        body = { data: book };
       }
     } else {
       throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');

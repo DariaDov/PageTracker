@@ -1,0 +1,21 @@
+2026-11-12 | TEST-06 | GREEN
+Command: node --test tests/test-06-book-details.test.js
+Result: 17 tests, 17 passed, 0 failed, 0 skipped.
+Coverage: authenticated book details; public response shape; owner-scoped missing/foreign 404; metadata edits preserve server-owned status; page count changes before first record and conflicts after reading starts without mutation; completed-only rating 1-5; validation and unknown-field rejection; safe storage failure; React details, records rendering, metadata/page-count callbacks, and completed-only rating callback.
+Output review: all targeted API and SSR/callback assertions passed.
+
+Regression command: npm test
+Regression result: 52 tests, 50 passed, 0 failed, 2 skipped.
+Skip analysis: two PostgreSQL acceptance tests require TEST_DATABASE_URL, which was unavailable in this execution environment. Therefore the PostgreSQL-specific update query was not exercised against a live database in this run.
+Regression output review: all executed TEST-01 through TEST-06 tests passed; the only skips were the two explicitly reported PostgreSQL tests.
+Final regression after adding the TEST-06 PostgreSQL case:
+Command: npm test
+Result: 53 tests, 50 passed, 0 failed, 3 skipped in this process.
+Skip analysis: the two TEST-01 PostgreSQL acceptance tests and the TEST-06 PostgreSQL integration test require TEST_DATABASE_URL; the latter separately passed 18/18 in the user's configured database environment as recorded above.
+Output review: every test executed in this process passed; all three skips explicitly cite the missing TEST_DATABASE_URL.
+
+2026-11-12 | TEST-06 | User-provided PostgreSQL verification
+Command: node --test tests/test-06-book-details.test.js (run by user in an environment with TEST_DATABASE_URL)
+Result: 18 tests, 18 passed, 0 failed, 0 skipped.
+PostgreSQL acceptance: updateForUser persistence across store instances and the page-count restriction after a reading record both passed.
+This result was reported by the user; no database URL or credentials were shared.

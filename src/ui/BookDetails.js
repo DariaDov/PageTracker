@@ -1,0 +1,116 @@
+'use strict';
+
+const React = require('react');
+
+function BookDetails({ book, records, onUpdate, onRate }) {
+  function submitMetadata(event) {
+    event.preventDefault();
+    const { title, author } = event.currentTarget.elements;
+    onUpdate({ title: title.value, author: author.value });
+  }
+
+  function submitPageCount(event) {
+    event.preventDefault();
+    const { totalPages } = event.currentTarget.elements;
+    onUpdate({ totalPages: Number(totalPages.value) });
+  }
+
+  return React.createElement(
+    'article',
+    { className: 'book-details' },
+    React.createElement('h1', null, book.title),
+    React.createElement('p', null, `Автор: ${book.author}`),
+    React.createElement('p', null, `Статус: ${book.status}`),
+    React.createElement('p', null, `Кількість сторінок: ${book.totalPages}`),
+    React.createElement(
+      'p',
+      null,
+      book.rating === null || book.rating === undefined
+        ? 'Рейтинг: немає'
+        : `Рейтинг: ${book.rating}`,
+    ),
+    React.createElement(
+      'form',
+      { 'data-form': 'metadata', onSubmit: submitMetadata },
+      React.createElement(
+        'label',
+        null,
+        'Назва книги',
+        React.createElement('input', {
+          name: 'title',
+          type: 'text',
+          defaultValue: book.title,
+          required: true,
+        }),
+      ),
+      React.createElement(
+        'label',
+        null,
+        'Автор',
+        React.createElement('input', {
+          name: 'author',
+          type: 'text',
+          defaultValue: book.author,
+          required: true,
+        }),
+      ),
+      React.createElement('button', { type: 'submit' }, 'Зберегти зміни'),
+    ),
+    records.length === 0
+      ? React.createElement(
+          'form',
+          { 'data-form': 'page-count', onSubmit: submitPageCount },
+          React.createElement(
+            'label',
+            null,
+            'Кількість сторінок',
+            React.createElement('input', {
+              name: 'totalPages',
+              type: 'number',
+              min: 1,
+              step: 1,
+              defaultValue: book.totalPages,
+              required: true,
+            }),
+          ),
+          React.createElement('button', { type: 'submit' }, 'Змінити кількість сторінок'),
+        )
+      : null,
+    book.status === 'прочитано'
+      ? React.createElement(
+          'label',
+          null,
+          'Рейтинг',
+          React.createElement(
+            'select',
+            {
+              name: 'rating',
+              value: book.rating ?? '',
+              onChange: (event) => onRate(Number(event.currentTarget.value)),
+            },
+            React.createElement('option', { value: '' }, 'Оберіть оцінку'),
+            ...[1, 2, 3, 4, 5].map((rating) =>
+              React.createElement('option', { key: rating, value: rating }, rating),
+            ),
+          ),
+        )
+      : null,
+    React.createElement('h2', null, 'Записи читання'),
+    records.length > 0
+      ? React.createElement(
+          'ul',
+          null,
+          records.map((record) =>
+            React.createElement(
+              'li',
+              { key: record.id },
+              React.createElement('time', { dateTime: record.date }, record.date),
+              ` — ${record.pagesRead} сторінок`,
+            ),
+          ),
+        )
+      : React.createElement('p', null, 'Записів читання ще немає'),
+  );
+}
+
+module.exports = { BookDetails };
