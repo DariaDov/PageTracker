@@ -1,0 +1,8 @@
+2026-11-12 | TEST-GATE-09 | APPROVED by human
+Feature: FEAT-09 listing, editing, and deleting reading records on book details.
+Requirements: REQ-F-011, REQ-F-031, REQ-F-032, REQ-F-033, REQ-F-034, REQ-F-037, REQ-I-006, REQ-I-013.
+Approved scope: ordered record list on book details (date, then start page; display only date and page count); PATCH page bounds only for books with status "читається", revalidate creation rules and preserve state on invalid input/storage errors; transition to "прочитано" when an edit reaches the final page; DELETE only after UI confirmation; reject edits/deletes for completed books; reject deletions that create a page gap; reset status to "розпочати" only when deleting the sole record, otherwise preserve "читається"; enforce owner isolation; log actions without payload; keep persistence changes atomic.
+REQ-F-033 interpretation: "deleting the last record" means deleting the sole remaining record. Deleting the latest sequential record when earlier records remain leaves the book status "читається", consistent with the remaining records and the page-continuity rule.
+PostgreSQL acceptance: user declined a conditional repository PostgreSQL integration test and intends to run database tests in their terminal.
+TDD gate: add and run tests before implementation; verify expected red failures before coding. Documentation is not to be modified.
+Red verification: 10 tests, 0 passed, 10 failed, 0 skipped. The failures are expected: the reading-record list/update/delete API operations are absent, and book details have no edit form or confirmed-delete action. No fixture or syntax failures were observed.

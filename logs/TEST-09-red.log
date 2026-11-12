@@ -1,0 +1,5 @@
+2026-11-12 | TEST-09 | RED
+Command: node --test tests/test-09-reading-record-management.test.js
+Result: 10 tests, 0 passed, 10 failed, 0 skipped.
+Expected failures: GET /books/{bookId}/reading-records, PATCH /reading-records/{recordId}, and DELETE /reading-records/{recordId} are not implemented and return 404; the book-details component displays records but has no edit forms or confirmed delete controls.
+Output review: the failures match missing TEST-09 behavior; no fixture or syntax failures were observed. No TEST-09 implementation was present during this run.
