@@ -5,6 +5,7 @@ const { createHash, randomBytes } = require('node:crypto');
 const { verifyPassword } = require('../security/password-hasher.js');
 const { createActionLogger } = require('../observability/action-logger.js');
 const { RegistrationError, registerUser } = require('../application/registration-service.js');
+const { getDateInKyiv } = require('../time/kyiv-date.js');
 
 const REGISTER_PATH = '/api/auth/register';
 const LOGIN_PATH = '/api/auth/login';
@@ -13,6 +14,7 @@ const SESSION_COOKIE = 'pt_session';
 const ALLOWED_REGISTRATION_FIELDS = new Set(['email', 'password']);
 const ALLOWED_BOOK_FIELDS = new Set(['title', 'author', 'totalPages']);
 const ALLOWED_BOOK_PATCH_FIELDS = new Set(['title', 'author', 'totalPages', 'rating']);
+const ALLOWED_READING_RECORD_FIELDS = new Set(['startPage', 'endPage']);
 
 class ApiProblem extends Error {
   constructor(status, code, title, detail, errors) {
@@ -144,6 +146,39 @@ function validateBookPatchShape(body) {
   }
 }
 
+function validateReadingRecordShape(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані');
+  }
+
+  const unknownFields = Object.keys(body).filter(
+    (field) => !ALLOWED_READING_RECORD_FIELDS.has(field),
+  );
+  if (unknownFields.length > 0) {
+    throw new ApiProblem(
+      400,
+      'INVALID_PARAMETER',
+      'Bad Request',
+      'Невідоме поле запиту',
+      unknownFields.map((field) => ({
+        pointer: `/${field}`,
+        code: 'unknown_field',
+        message: 'Невідоме поле запиту',
+      })),
+    );
+  }
+
+  const errors = [];
+  for (const field of ALLOWED_READING_RECORD_FIELDS) {
+    if (!Number.isInteger(body[field]) || body[field] < 1) {
+      errors.push({ pointer: `/${field}`, code: 'required', message: 'заповніть дані' });
+    }
+  }
+  if (errors.length > 0) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані', errors);
+  }
+}
+
 function publicBook(book) {
   return {
     id: book.id,
@@ -152,6 +187,17 @@ function publicBook(book) {
     totalPages: book.totalPages,
     status: book.status,
     rating: book.rating,
+  };
+}
+
+function publicReadingRecord(record) {
+  return {
+    id: record.id,
+    bookId: record.bookId,
+    startPage: record.startPage,
+    endPage: record.endPage,
+    pagesRead: record.pagesRead,
+    date: record.date,
   };
 }
 
@@ -285,6 +331,7 @@ function createApiServer({ store, logger = createActionLogger() } = {}) {
 async function handleRequest(request, response, { store, logger }) {
   const url = new URL(request.url, 'http://localhost');
   const pathname = url.pathname;
+  const readingRecordsPath = pathname.match(/^\/api\/books\/([^/]+)\/reading-records$/);
   let status = 500;
   let outcome = 'failure';
   let body;
@@ -344,6 +391,26 @@ async function handleRequest(request, response, { store, logger }) {
       outcome = 'success';
       noContent = true;
       responseHeaders['set-cookie'] = clearedSessionCookie();
+    } else if (readingRecordsPath && request.method === 'POST') {
+      action = 'reading-records.create';
+      const user = await authenticateRequest(request, store);
+      actorId = user.id;
+      const book = await store.books.findByIdForUser(readingRecordsPath[1], user.id);
+      if (!book) {
+        throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+      }
+
+      const payload = await readJsonBody(request);
+      validateReadingRecordShape(payload);
+      const record = await store.readingRecords.create({
+        bookId: book.id,
+        startPage: payload.startPage,
+        endPage: payload.endPage,
+        date: getDateInKyiv(),
+      });
+      status = 201;
+      outcome = 'success';
+      body = { data: publicReadingRecord(record) };
     } else if (
       (pathname === '/api/books' && ['GET', 'POST'].includes(request.method)) ||
       (/^\/api\/books\/[^/]+$/.test(pathname) && ['GET', 'PATCH'].includes(request.method))

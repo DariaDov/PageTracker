@@ -6,3 +6,6 @@ UI coverage: SSR home form offers only books with status розпочати/чи
 Scope boundary: range ordering, page bounds, overlaps, continuity, and reading-status transitions are reserved for TEST-08.
 TDD gate: add and run tests before implementation; record corrected expected red results before coding.
 Red verification: 10 tests, 1 passed, 9 failed, 0 skipped. The pass is the catch-all 404 response for foreign/missing book paths; the route itself is not implemented. Expected failures are the absent POST reading-record endpoint and missing HomeReadingForm component.
+2026-11-12 | VAL-07 / GATE-07 | APPROVED by human after verification
+Verification: TEST-07 passed 10/10; full regression passed 60 tests, failed 0, skipped 3 (PostgreSQL tests require TEST_DATABASE_URL, unavailable in the full-regression process).
+Decision: accept TEST-07 implementation and authorize its separate green-stage commit.

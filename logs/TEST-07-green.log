@@ -1,0 +1,10 @@
+2026-11-12 | TEST-07 | GREEN
+Command: node --test tests/test-07-reading-entry.test.js
+Result: 10 tests, 10 passed, 0 failed, 0 skipped.
+Coverage: authenticated record creation; server-calculated pagesRead and Europe/Kyiv date; multiple records on a single date; missing/foreign book behavior; incomplete fields; malformed JSON and client-supplied derived fields; safe storage failure; action logging; active-book selection and home form callbacks.
+Output review: all targeted API and SSR/callback assertions passed.
+
+Regression command: npm test
+Regression result: 63 tests, 60 passed, 0 failed, 3 skipped.
+Skip analysis: two TEST-01 and one TEST-06 PostgreSQL acceptance tests require TEST_DATABASE_URL, unavailable in this execution environment. The TEST-06 PostgreSQL case separately passed 18/18 in the user's configured environment.
+Regression output review: all executed TEST-01 through TEST-07 tests passed; the only skips explicitly require the missing TEST_DATABASE_URL.
