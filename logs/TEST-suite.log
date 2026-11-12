@@ -1,0 +1,98 @@
+✖ REQ-NF-003: password hashes are not plaintext and can be verified (3.805654ms)
+✖ REQ-NF-006: failed work rolls back and releases its database connection (1.184546ms)
+✖ Europe/Kyiv date conversion handles the UTC date boundary (0.58788ms)
+﹣ REQ-NF-004 / REQ-NF-007: PostgreSQL data persists across store instances at planned capacity (0.491093ms) # Set TEST_DATABASE_URL to run PostgreSQL acceptance tests.
+﹣ REQ-NF-006: a failed database transaction leaves no partial book data (0.394808ms) # Set TEST_DATABASE_URL to run PostgreSQL acceptance tests.
+✖ Action logging: structured events exclude credentials and session secrets (0.639248ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 2
+ℹ todo 0
+ℹ duration_ms 182.011565
+
+✖ failing tests:
+
+test at tests/test-01-foundation.test.js:7:1
+✖ REQ-NF-003: password hashes are not plaintext and can be verified (3.805654ms)
+  Error: Cannot find module '../src/security/password-hasher.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js:8:44)
+      at Test.runInAsyncScope (node:async_hooks:214:14) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js' ]
+  }
+
+test at tests/test-01-foundation.test.js:17:1
+✖ REQ-NF-006: failed work rolls back and releases its database connection (1.184546ms)
+  Error: Cannot find module '../src/infrastructure/transaction.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js:18:31)
+      at Test.runInAsyncScope (node:async_hooks:214:14) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js' ]
+  }
+
+test at tests/test-01-foundation.test.js:47:1
+✖ Europe/Kyiv date conversion handles the UTC date boundary (0.58788ms)
+  Error: Cannot find module '../src/time/kyiv-date.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js:48:29)
+      at Test.runInAsyncScope (node:async_hooks:214:14) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js' ]
+  }
+
+test at tests/test-01-foundation.test.js:153:1
+✖ Action logging: structured events exclude credentials and session secrets (0.639248ms)
+  Error: Cannot find module '../src/observability/action-logger.js'
+  Require stack:
+  - /home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+      at Module.require (node:internal/modules/cjs/loader:1504:12)
+      at require (node:internal/modules/helpers:152:16)
+      at TestContext.<anonymous> (/home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js:154:34)
+      at Test.runInAsyncScope (node:async_hooks:214:14) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/home/daria/ПІС/PageTracker/tests/test-01-foundation.test.js' ]
+  }
+
+Latest full-suite result reported from the user's terminal (2026-11-12):
+tests 6; pass 0; fail 6; skipped 0.
+All six tests failed with MODULE_NOT_FOUND for the expected, unimplemented TEST-01 modules:
+password-hasher.js, transaction.js, kyiv-date.js, postgres-store.js (two tests), action-logger.js.
+PostgreSQL-backed tests executed with TEST_DATABASE_URL available in that terminal.
