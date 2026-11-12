@@ -1,0 +1,8 @@
+2026-11-12 | TEST-05 | RED
+Command: node --test tests/test-05-library.test.js
+Final red result: 11 tests, 2 passed, 9 failed, 0 skipped.
+Expected API failures: POST /api/books is not implemented and returns 404 instead of the required 201, 401, 422, 400, or safe 500 outcomes.
+Expected UI failures: src/ui/BookLibrary.js does not exist; the four SSR/callback tests fail with MODULE_NOT_FOUND.
+Existing behavior verified green before implementation: GET /api/books owner-scoped pagination at the 16/17 boundary and invalid page parameter responses both passed.
+Test-fixture correction: the first attempt was blocked by the test memory store missing API-required user methods; after adding those methods, a duplicate test-fixture property was corrected. Neither was an application failure. The final result above is the corrected red baseline.
+No TEST-05 feature implementation was present during this run.

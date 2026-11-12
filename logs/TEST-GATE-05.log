@@ -1,0 +1,7 @@
+2026-11-12 | TEST-GATE-05 | APPROVED by human
+Feature: FEAT-05 book creation and paginated library.
+Requirements: REQ-F-001, REQ-F-002, REQ-F-004, REQ-F-024, REQ-F-026, REQ-F-027, REQ-I-004, REQ-I-010, REQ-I-011, REQ-I-015, REQ-I-016.
+API coverage: authenticated book creation and owner-scoped listing; initial status/rating; validation and no mutation; malformed JSON/unknown fields; storage failure; page size 16 and 16/17 boundary; invalid page; action logging without request payload.
+UI coverage: React server-rendered Ukrainian creation form and book metadata, plus callback-level tests for form submission and numbered page selection. No browser or routing framework is in scope.
+TDD gate: tests are written and run before implementation; inspect and record expected red failures before any feature code is added.
+Red verification: 11 tests, 2 passed, 9 failed. Expected failures are missing POST /api/books behavior (404 instead of the contract outcomes) and missing src/ui/BookLibrary.js; existing GET pagination and invalid-page behavior passed.
