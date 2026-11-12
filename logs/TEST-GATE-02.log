@@ -4,4 +4,7 @@ Scope: REQ-F-019, REQ-F-021, REQ-F-022, REQ-F-023, REQ-F-030, REQ-F-041, REQ-F-0
 Scenarios: successful public registration without session; non-empty short password and non-email-formatted address; case-sensitive email uniqueness; missing/whitespace-only fields; exact duplicate email; malformed JSON; unknown request field; storage failure without partial account or internal diagnostic leakage; logging success and rejected outcomes without credentials.
 Test integration contract approved by human: createApiServer({ store, logger }) returns a Node.js HTTP server.
 Red baseline: 8 tests, 0 passed, 8 failed, 0 skipped. All failed because src/api/server.js is not implemented (MODULE_NOT_FOUND).
-Gate authorizes implementation of registration behavior only after tests; it does not close GATE-02 or imply VAL-02.
+Gate authorized registration implementation after TEST-GATE-02; the implementation has now passed verification.
+VER-02 full regression (user terminal, 2026-11-12): 14 tests, 14 passed, 0 failed, 0 skipped.
+VAL-02 accepted by human (2026-11-12): registration behavior accepted against TEST-02 scope.
+GATE-02 approved by human (2026-11-12): TEST-03 preparation authorized; implementation still requires TEST-GATE-03.

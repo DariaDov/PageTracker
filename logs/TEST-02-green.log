@@ -1,0 +1,16 @@
+✔ TEST-02 / REQ-F-019, REQ-F-022, REQ-F-023, REQ-F-041: registration creates a public account without starting a session (132.341317ms)
+✔ TEST-02 / REQ-F-021: email uniqueness is case-sensitive (84.298195ms)
+✔ TEST-02 / REQ-F-042: missing and whitespace-only credentials are rejected without storing an account (12.313103ms)
+✔ TEST-02 / REQ-F-030, API-CL-08: duplicate exact email returns the approved conflict without a second account (43.206881ms)
+✔ TEST-02 / API-CL-05, API-CL-06: malformed JSON returns the shared 400 problem response without mutation (2.518571ms)
+✔ TEST-02 / API-CL-09: unknown request fields are rejected without mutation (3.771364ms)
+✔ TEST-02 / OpenAPI 500: storage failure returns a safe problem response without partial account data (31.264299ms)
+✔ TEST-02 / action logging: successful and rejected registration requests are logged without credentials (34.003158ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 399.198469

@@ -1,0 +1,22 @@
+✔ REQ-NF-003: password hashes are not plaintext and can be verified (110.600725ms)
+✔ REQ-NF-006: failed work rolls back and releases its database connection (1.616444ms)
+✔ Europe/Kyiv date conversion handles the UTC date boundary (14.743236ms)
+✔ REQ-NF-004 / REQ-NF-007: PostgreSQL data persists across store instances at planned capacity (812.062565ms)
+✔ REQ-NF-006: a failed database transaction leaves no partial book data (9.554912ms)
+✔ Action logging: structured events exclude credentials and session secrets (0.838049ms)
+✔ TEST-02 / REQ-F-019, REQ-F-022, REQ-F-023, REQ-F-041: registration creates a public account without starting a session (126.560947ms)
+✔ TEST-02 / REQ-F-021: email uniqueness is case-sensitive (83.868734ms)
+✔ TEST-02 / REQ-F-042: missing and whitespace-only credentials are rejected without storing an account (10.862881ms)
+✔ TEST-02 / REQ-F-030, API-CL-08: duplicate exact email returns the approved conflict without a second account (42.626268ms)
+✔ TEST-02 / API-CL-05, API-CL-06: malformed JSON returns the shared 400 problem response without mutation (3.336585ms)
+✔ TEST-02 / API-CL-09: unknown request fields are rejected without mutation (4.039026ms)
+✔ TEST-02 / OpenAPI 500: storage failure returns a safe problem response without partial account data (30.630761ms)
+✔ TEST-02 / action logging: successful and rejected registration requests are logged without credentials (33.562999ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1005.124136
