@@ -1,0 +1,7 @@
+2026-11-12 | TEST-GATE-10 | APPROVED by human
+Feature: FEAT-10 book deletion and its effect on the library and statistics.
+Requirements: REQ-F-014, REQ-I-017, REQ-F-039, REQ-F-001, REQ-NF-006.
+Approved scope: DELETE an owned book with 204; atomically remove the book and all reading records; verify the deleted book is absent from the user's library and its records are no longer available to later statistics; return 401 for unauthenticated requests and the same 404 for foreign/missing books; preserve all data on storage failure; log success/failure without payload; book-details confirmation text is exactly "Ви хочете видалити цю книгу"; cancellation does not call deletion; confirmation calls the delete/navigation callback to return to the library.
+PostgreSQL acceptance: user declined a conditional repository PostgreSQL integration test and intends to run database tests in their terminal.
+TDD gate: add and run tests before implementation; verify expected red failures before coding. Documentation is not to be modified.
+Red verification: 4 tests, 0 passed, 4 failed, 0 skipped. The failures are expected: DELETE /api/books/{bookId} is absent, and book details have no delete-book confirmation control. After completing the fixture contract, no fixture or syntax failures were observed.

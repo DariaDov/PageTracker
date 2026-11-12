@@ -1,0 +1,5 @@
+2026-11-12 | TEST-10 | RED
+Command: node --test tests/test-10-book-deletion.test.js
+Result: 4 tests, 0 passed, 4 failed, 0 skipped.
+Expected failures: DELETE /api/books/{bookId} is not implemented and returns 404 before authentication, ownership, cascade, and rollback behavior can be verified; book details have no delete-book confirmation control.
+Output review: after correcting the initial test fixture to satisfy createApiServer's existing store contract, all remaining failures correspond to absent TEST-10 behavior. No fixture or syntax failures were observed. No TEST-10 implementation was present during this run.
