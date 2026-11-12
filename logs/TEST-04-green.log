@@ -1,0 +1,11 @@
+2026-11-12 | TEST-04 | GREEN
+Command: node --test tests/test-04-navigation.test.js
+Result: 3 tests, 3 passed, 0 failed, 0 skipped.
+REQ-I-012: Ukrainian navigation sections and the logout button are present.
+REQ-I-002: Navigation has the approved Ukrainian accessible label.
+FEAT-04: The shared shell renders its active page content.
+Runtime log review: the test process emitted only the expected TAP results; no application server was started for this server-rendered component test.
+Regression command: npm test
+Regression result: 24 tests, 22 passed, 0 failed, 2 skipped.
+Skip analysis: both skipped tests require TEST_DATABASE_URL and are PostgreSQL acceptance tests (capacity/persistence and transaction atomicity); no PostgreSQL tests ran in this environment.
+Regression log review: all executed foundation, TEST-02, TEST-03, and TEST-04 tests passed; the only skips were explicitly reported for the unavailable TEST_DATABASE_URL.
