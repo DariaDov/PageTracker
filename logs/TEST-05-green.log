@@ -1,0 +1,10 @@
+2026-11-12 | TEST-05 | GREEN
+Command: node --test tests/test-05-library.test.js
+Result: 11 tests, 11 passed, 0 failed, 0 skipped.
+Coverage: authenticated book creation, approved initial status/rating, invalid input and unknown-field rejection without mutation, malformed JSON, safe storage failure, action event contents, owner-scoped pagination at the 16/17 boundary, invalid page values, Ukrainian library form and metadata, form submission callback, and numbered-page callback.
+Output review: all TEST-05 assertions passed. An initial run had one test matcher failure because React represents numeric page children as numbers; the matcher was corrected to compare their string representation, and the complete suite then passed.
+
+Regression command: npm test
+Regression result: 35 tests, 33 passed, 0 failed, 2 skipped.
+Skip analysis: both skipped tests require TEST_DATABASE_URL and cover PostgreSQL capacity/persistence and transaction atomicity; this execution environment did not expose that variable.
+Regression output review: all executed TEST-01 through TEST-05 tests passed. No server process was started by SSR component tests.

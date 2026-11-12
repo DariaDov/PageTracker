@@ -11,6 +11,7 @@ const LOGIN_PATH = '/api/auth/login';
 const LOGOUT_PATH = '/api/auth/logout';
 const SESSION_COOKIE = 'pt_session';
 const ALLOWED_REGISTRATION_FIELDS = new Set(['email', 'password']);
+const ALLOWED_BOOK_FIELDS = new Set(['title', 'author', 'totalPages']);
 
 class ApiProblem extends Error {
   constructor(status, code, title, detail, errors) {
@@ -62,6 +63,52 @@ function validateCredentials(email, password) {
   if (errors.length > 0) {
     throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані', errors);
   }
+}
+
+function validateBookShape(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані');
+  }
+
+  const unknownFields = Object.keys(body).filter((field) => !ALLOWED_BOOK_FIELDS.has(field));
+  if (unknownFields.length > 0) {
+    throw new ApiProblem(
+      400,
+      'INVALID_PARAMETER',
+      'Bad Request',
+      'Невідоме поле запиту',
+      unknownFields.map((field) => ({
+        pointer: `/${field}`,
+        code: 'unknown_field',
+        message: 'Невідоме поле запиту',
+      })),
+    );
+  }
+
+  const errors = [];
+  if (typeof body.title !== 'string' || body.title.trim().length === 0) {
+    errors.push({ pointer: '/title', code: 'required', message: 'заповніть дані' });
+  }
+  if (typeof body.author !== 'string' || body.author.trim().length === 0) {
+    errors.push({ pointer: '/author', code: 'required', message: 'заповніть дані' });
+  }
+  if (!Number.isInteger(body.totalPages) || body.totalPages < 1) {
+    errors.push({ pointer: '/totalPages', code: 'minimum', message: 'заповніть дані' });
+  }
+  if (errors.length > 0) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані', errors);
+  }
+}
+
+function publicBook(book) {
+  return {
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    totalPages: book.totalPages,
+    status: book.status,
+    rating: book.rating,
+  };
 }
 
 function toProblem(error, instance) {
@@ -254,29 +301,44 @@ async function handleRequest(request, response, { store, logger }) {
       noContent = true;
       responseHeaders['set-cookie'] = clearedSessionCookie();
     } else if (
-      (pathname === '/api/books' && request.method === 'GET') ||
+      (pathname === '/api/books' && ['GET', 'POST'].includes(request.method)) ||
       (/^\/api\/books\/[^/]+$/.test(pathname) && ['GET', 'PATCH'].includes(request.method))
     ) {
       const user = await authenticateRequest(request, store);
       actorId = user.id;
 
       if (pathname === '/api/books') {
-        action = 'books.list';
-        const pageValue = url.searchParams.get('page') ?? '1';
-        if (!/^[1-9]\d*$/.test(pageValue)) {
-          throw new ApiProblem(400, 'INVALID_PARAMETER', 'Bad Request', 'Некоректний номер сторінки');
+        if (request.method === 'POST') {
+          action = 'books.create';
+          const payload = await readJsonBody(request);
+          validateBookShape(payload);
+          const book = await store.books.create({
+            userId: user.id,
+            title: payload.title,
+            author: payload.author,
+            totalPages: payload.totalPages,
+          });
+          status = 201;
+          outcome = 'success';
+          body = { data: publicBook(book) };
+        } else {
+          action = 'books.list';
+          const pageValue = url.searchParams.get('page') ?? '1';
+          if (!/^[1-9]\d*$/.test(pageValue)) {
+            throw new ApiProblem(400, 'INVALID_PARAMETER', 'Bad Request', 'Некоректний номер сторінки');
+          }
+          const page = Number(pageValue);
+          const books = await store.books.listByUser(user.id);
+          const pageSize = 16;
+          const totalItems = books.length;
+          const totalPages = Math.ceil(totalItems / pageSize);
+          status = 200;
+          outcome = 'success';
+          body = {
+            data: books.slice((page - 1) * pageSize, page * pageSize).map(publicBook),
+            pagination: { page, pageSize, totalItems, totalPages },
+          };
         }
-        const page = Number(pageValue);
-        const books = await store.books.listByUser(user.id);
-        const pageSize = 16;
-        const totalItems = books.length;
-        const totalPages = Math.ceil(totalItems / pageSize);
-        status = 200;
-        outcome = 'success';
-        body = {
-          data: books.slice((page - 1) * pageSize, page * pageSize),
-          pagination: { page, pageSize, totalItems, totalPages },
-        };
       } else {
         const bookId = pathname.slice('/api/books/'.length);
         action = request.method === 'GET' ? 'books.read' : 'books.update';

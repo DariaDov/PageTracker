@@ -5,3 +5,6 @@ API coverage: authenticated book creation and owner-scoped listing; initial stat
 UI coverage: React server-rendered Ukrainian creation form and book metadata, plus callback-level tests for form submission and numbered page selection. No browser or routing framework is in scope.
 TDD gate: tests are written and run before implementation; inspect and record expected red failures before any feature code is added.
 Red verification: 11 tests, 2 passed, 9 failed. Expected failures are missing POST /api/books behavior (404 instead of the contract outcomes) and missing src/ui/BookLibrary.js; existing GET pagination and invalid-page behavior passed.
+2026-11-12 | VAL-05 / GATE-05 | APPROVED by human after verification
+Verification: TEST-05 passed 11/11. Full regression passed 33 tests, failed 0, skipped 2; the skipped PostgreSQL tests require TEST_DATABASE_URL, unavailable in the verification environment.
+Decision: accept TEST-05 implementation and authorize its separate green-stage commit.

@@ -144,6 +144,10 @@ test('TEST-05 / REQ-F-002, REQ-F-004, REQ-I-010, REQ-I-011: creating a book sets
   assert.equal(result.data.totalPages, 240);
   assert.equal(result.data.status, 'розпочати');
   assert.equal(result.data.rating, null);
+  assert.deepEqual(
+    Object.keys(result.data).sort(),
+    ['author', 'id', 'rating', 'status', 'title', 'totalPages'],
+  );
   assert.equal(store.bookRows.length, 1);
   assert.deepEqual(logger.events.at(-1), {
     action: 'books.create',
@@ -242,7 +246,7 @@ test('TEST-05 / REQ-F-001, REQ-I-004, REQ-I-015, REQ-I-016: library pages contai
   assert.equal(firstPage.status, 200);
   const firstResult = await firstPage.json();
   assert.equal(firstResult.data.length, 16);
-  assert.ok(firstResult.data.every((book) => book.userId === 'user-a'));
+  assert.ok(firstResult.data.every((book) => book.id.startsWith('a-')));
   assert.deepEqual(firstResult.pagination, {
     page: 1,
     pageSize: 16,
@@ -353,7 +357,7 @@ test('TEST-05 / REQ-I-016: numbered page controls call the approved page callbac
 
   const secondPageControl = findElement(
     element.type(element.props),
-    (candidate) => candidate.type === 'button' && candidate.props.children === '2',
+    (candidate) => candidate.type === 'button' && String(candidate.props.children) === '2',
   );
   assert.ok(secondPageControl, 'expected a button for page 2');
   secondPageControl.props.onClick();
