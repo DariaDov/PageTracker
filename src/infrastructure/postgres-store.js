@@ -3,6 +3,7 @@
 const { randomUUID } = require('node:crypto');
 const { Pool } = require('pg');
 const { withTransaction } = require('./transaction.js');
+const { mapCalendarDate } = require('./postgres-date.js');
 
 const MIGRATIONS = `
   CREATE TABLE IF NOT EXISTS users (
@@ -72,7 +73,7 @@ function mapReadingRecord(row) {
     startPage: row.start_page,
     endPage: row.end_page,
     pagesRead: row.pages_read,
-    date: row.date,
+    date: mapCalendarDate(row.date),
   };
 }
 

@@ -1,0 +1,18 @@
+2026-11-12 | TEST-GATE-12 | APPROVED by human
+Prerequisite: GATE-11 closed by human after VAL-11.
+Feature: TEST-12 non-functional verification and pre-integration regression.
+Requirements: REQ-NF-001, REQ-NF-002, REQ-NF-006, REQ-NF-007, REQ-NF-009.
+Approved scope: measure batches of ten concurrent requests for login, library listing, reading-record creation, and statistics; each batch must complete within 2 seconds. Reuse the existing conditional TEST-01 PostgreSQL acceptance test for persistence at 100 books and 5,000 records per user; the user will run it in their terminal. Reuse existing transaction, record, and book deletion rollback tests for atomicity; run the full regression for REQ-NF-009.
+Performance verification includes both a fast API fixture and a conditional PostgreSQL-backed run using TEST_DATABASE_URL; the latter is expected to be run by the user in their database environment.
+Compatibility decision: Chromium only, SSR render-only, no new browser dependency or client bundle. Firefox, WebKit/Safari, Edge, and browser-side interaction/hydration remain unverified and will be reported as limitations, not as passing browser coverage.
+TDD note: TEST-12 began as verification-only. A user-reported PostgreSQL-backed run exposed a real data-mapping defect; a focused date-normalization test was run RED before implementing the correction.
+Documentation: do not modify documentation.
+User-reported RED: PostgreSQL-backed TEST-12 failed in the statistics batch: pagesReadTotal was 0 instead of 2; total test duration was 4,589.5 ms. This was a response-data assertion, not a 2-second threshold assertion.
+Diagnosis: node-postgres parses PostgreSQL DATE columns as JavaScript Date objects. The store returned that object unchanged, but statistics compares calendar-date strings; additionally, JSON responses exposed a timestamp instead of the OpenAPI date shape.
+Correction: normalize PostgreSQL DATE values to YYYY-MM-DD using their local calendar fields before exposing/storing reading records; query statistics against the returned record date to avoid a midnight/week-boundary race. Added a focused node-postgres DATE parser test.
+Focused date test: RED before helper implementation (missing normalizer), then GREEN, 1 passed.
+Targeted result: 3 passed, 0 failed, 1 PostgreSQL-backed performance test skipped because TEST_DATABASE_URL is unavailable. In-memory API batches of 10 completed in 232.1 ms for login, 12.4 ms for library listing, 13.0 ms for reading-record creation, and 12.3 ms for statistics.
+Full regression: 105 tests, 101 passed, 0 failed, 4 skipped. Skips are the conditional TEST-01 persistence and database rollback checks, TEST-06 PostgreSQL page-count check, and TEST-12 PostgreSQL-backed performance check. Existing action-logging secrecy and state-transition logging tests passed.
+User rerun after fix: reported 105 tests passed, 0 failed, 0 skipped. The no-skip result confirms conditional PostgreSQL checks, including TEST-12 PostgreSQL-backed load, executed in the user's environment.
+2026-11-12 | VAL-12 | APPROVED by human after the user's PostgreSQL-backed rerun passed 105/105 with no skips.
+Commit: explicitly authorized by human; unrelated pre-existing traceability-matrix.md and node_modules/ remain excluded.

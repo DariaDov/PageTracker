@@ -1,0 +1,6 @@
+User-reported terminal result before the PostgreSQL DATE mapping fix:
+Test: TEST-12 / REQ-NF-002: PostgreSQL-backed ten-user load stays within two seconds
+Failure: statistics response reported pagesReadTotal 0; expected 2.
+Total test duration: 4,589.5 ms. The failure was an assertion on statistics data, not the two-second latency assertion.
+Diagnosis: node-postgres returns PostgreSQL DATE values as JavaScript Date objects. The store had passed those objects through unchanged, while statistics compares YYYY-MM-DD strings.
+No database URL, credentials, or other secrets were included.

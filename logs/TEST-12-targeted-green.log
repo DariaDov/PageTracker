@@ -1,0 +1,16 @@
+✔ TEST-12 / REQ-NF-002: ten concurrent users complete all timed API operations within two seconds (415.154792ms)
+ℹ login: 10 concurrent requests completed in 232.1 ms
+ℹ library listing: 10 concurrent requests completed in 12.4 ms
+ℹ reading-record creation: 10 concurrent requests completed in 13.0 ms
+ℹ statistics: 10 concurrent requests completed in 12.3 ms
+﹣ TEST-12 / REQ-NF-002: PostgreSQL-backed ten-user load stays within two seconds (0.176598ms) # Set TEST_DATABASE_URL to run PostgreSQL performance acceptance.
+✔ TEST-12 / REQ-NF-001: statistics and book details produce browser-ready SSR markup (14.039968ms)
+✔ TEST-12 / PostgreSQL DATE values retain their calendar date (17.820671ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 574.042828

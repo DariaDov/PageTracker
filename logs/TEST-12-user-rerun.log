@@ -1,0 +1,7 @@
+User-reported rerun after PostgreSQL DATE normalization:
+tests 105
+pass 105
+fail 0
+skipped 0
+The full suite ran without conditional PostgreSQL skips, including the TEST-12 PostgreSQL-backed load test.
+No database URL or credentials recorded.

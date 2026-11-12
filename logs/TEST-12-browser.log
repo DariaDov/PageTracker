@@ -1,0 +1,5 @@
+2026-11-12 | TEST-12 / REQ-NF-001 | Chromium SSR render-only check
+Harness: integrated Chromium browser opened a temporary local HTTP server serving server-rendered React markup. No dependencies or client bundle were added; temporary server stopped after validation.
+Rendered authenticated navigation, statistics dashboard, and book details.
+Observed accessible snapshot: Ukrainian navigation links and logout button; statistics period selector and date field; current summary values; book title, metadata fields, page count, and empty reading-record state.
+Result: render-only check passed. No hydration, interaction, or cross-browser behavior was tested. Firefox, WebKit/Safari, and Edge remain unverified as required by the approved scope.

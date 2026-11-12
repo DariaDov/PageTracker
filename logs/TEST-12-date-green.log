@@ -1,0 +1,9 @@
+✔ TEST-12 / PostgreSQL DATE values retain their calendar date (20.158429ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 134.353124
