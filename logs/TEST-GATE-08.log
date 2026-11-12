@@ -1,0 +1,8 @@
+2026-11-12 | TEST-GATE-08 | APPROVED by human
+Feature: FEAT-08 reading-entry range, continuity, overlap, and status rules.
+Requirements: REQ-F-006, REQ-F-008, REQ-F-009, REQ-F-010, REQ-F-025, REQ-F-036, REQ-NF-006.
+Coverage: first record begins at page 1; later records are contiguous; overlap/gap responses preserve data; invalid boundary ordering and page values return approved validation details; last-page and one-page completion; completed books reject further records; status transition and record insertion roll back together on storage failure; action logs exclude payload.
+TEST-GATE-08 approval includes the stated API behavior and scopes record update/delete operations to later stages.
+PostgreSQL acceptance: user declined adding a repository conditional PostgreSQL integration test and intends to run database tests in their terminal.
+TDD gate: add and run tests before implementation; record corrected expected red results before coding.
+Red verification: 12 tests, 2 passed, 10 failed, 0 skipped. The passes cover a valid already-contiguous record and the existing action-log whitelist. Expected failures cover first-page/gap/overlap validation, field-specific page messages, status transitions/completion, completed-book rejection, and transactional rollback after status-update failure.

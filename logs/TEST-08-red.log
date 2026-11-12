@@ -1,0 +1,6 @@
+2026-11-12 | TEST-08 | RED
+Command: node --test tests/test-08-reading-rules.test.js
+Result: 12 tests, 2 passed, 10 failed, 0 skipped.
+Existing green behavior: an already-contiguous record is accepted; action logging records the success event without request payload.
+Expected failures: no first-page or subsequent-gap rule; overlapping pages accepted; end-before-start accepted; page-range validation returns the generic incomplete-field message instead of the SRS message; first/final-page status transitions missing; completed books are not protected from new records; insertion/status update are not one atomic operation.
+No TEST-08 feature implementation was present during this run.
