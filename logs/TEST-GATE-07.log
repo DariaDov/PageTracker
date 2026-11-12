@@ -1,0 +1,8 @@
+2026-11-12 | TEST-GATE-07 | APPROVED by human
+Feature: FEAT-07 home reading-entry creation.
+Requirements: REQ-F-003, REQ-F-007, REQ-F-035, REQ-F-043, REQ-I-007, REQ-I-008, REQ-I-019.
+API coverage: authenticated POST; server-computed pagesRead and Europe/Kyiv date; multiple records on one date; missing/foreign book isolation; incomplete request validation; malformed JSON and rejection of client-supplied date/pagesRead/bookId/userId; safe storage failure; action logging without payload.
+UI coverage: SSR home form offers only books with status розпочати/читається, provides start/end page inputs but no date/pagesRead inputs, and submits bookId plus bounds through a callback while remaining on the home view. No browser/router framework in scope.
+Scope boundary: range ordering, page bounds, overlaps, continuity, and reading-status transitions are reserved for TEST-08.
+TDD gate: add and run tests before implementation; record corrected expected red results before coding.
+Red verification: 10 tests, 1 passed, 9 failed, 0 skipped. The pass is the catch-all 404 response for foreign/missing book paths; the route itself is not implemented. Expected failures are the absent POST reading-record endpoint and missing HomeReadingForm component.

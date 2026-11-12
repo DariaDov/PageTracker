@@ -1,0 +1,7 @@
+2026-11-12 | TEST-07 | RED
+Command: node --test tests/test-07-reading-entry.test.js
+Result: 10 tests, 1 passed, 9 failed, 0 skipped.
+Expected API failures: POST /api/books/{bookId}/reading-records is not implemented; valid creation returns 404 instead of 201, unauthenticated requests return 404 instead of 401, incomplete payloads return 404 instead of 422, malformed/unknown payloads return 404 instead of 400, and storage failure path is unreachable.
+Expected UI failures: src/ui/HomeReadingForm.js does not exist; the three server-rendered/callback tests fail with MODULE_NOT_FOUND.
+Existing fallback behavior: foreign/missing book paths both receive the server's catch-all 404. This passes the expected status/equality assertion but does not indicate the reading-record endpoint is implemented.
+No TEST-07 feature implementation was present during this run.
