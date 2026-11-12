@@ -1,0 +1,6 @@
+2026-11-12 | TEST-11 | RED
+Command: node --test tests/test-11-statistics.test.js
+Result: 10 tests, 0 passed, 10 failed, 0 skipped.
+Expected failures: GET /api/statistics is not implemented and returns 404 for calculations, period validation, authentication, and storage-error cases; the statistics UI component does not exist.
+Output review: failures are explained by the absent statistics API and page. The current-record test also receives no `data` because the endpoint returns 404; this is the same expected missing-feature failure. No fixture or syntax failures were observed.
+No TEST-11 implementation was present during this run.
