@@ -2,7 +2,15 @@
 
 const React = require('react');
 
-function BookDetails({ book, records, onUpdate, onRate, onUpdateRecord, onDeleteRecord }) {
+function BookDetails({
+  book,
+  records,
+  onUpdate,
+  onRate,
+  onUpdateRecord,
+  onDeleteRecord,
+  onDeleteBook,
+}) {
   function submitMetadata(event) {
     event.preventDefault();
     const { title, author } = event.currentTarget.elements;
@@ -35,6 +43,22 @@ function BookDetails({ book, records, onUpdate, onRate, onUpdateRecord, onDelete
     'article',
     { className: 'book-details' },
     React.createElement('h1', null, book.title),
+    typeof onDeleteBook === 'function'
+      ? React.createElement(
+          'button',
+          {
+            type: 'button',
+            'data-delete-book': book.id,
+            onClick: (event) => {
+              event.preventDefault();
+              if (globalThis.confirm('Ви хочете видалити цю книгу')) {
+                onDeleteBook(book.id);
+              }
+            },
+          },
+          'Видалити книгу',
+        )
+      : null,
     React.createElement('p', null, `Автор: ${book.author}`),
     React.createElement('p', null, `Статус: ${book.status}`),
     React.createElement('p', null, `Кількість сторінок: ${book.totalPages}`),

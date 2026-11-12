@@ -636,7 +636,7 @@ async function handleRequest(request, response, { store, logger }) {
       }
     } else if (
       (pathname === '/api/books' && ['GET', 'POST'].includes(request.method)) ||
-      (/^\/api\/books\/[^/]+$/.test(pathname) && ['GET', 'PATCH'].includes(request.method))
+      (/^\/api\/books\/[^/]+$/.test(pathname) && ['GET', 'PATCH', 'DELETE'].includes(request.method))
     ) {
       const user = await authenticateRequest(request, store);
       actorId = user.id;
@@ -675,36 +675,56 @@ async function handleRequest(request, response, { store, logger }) {
         }
       } else {
         const bookId = pathname.slice('/api/books/'.length);
-        action = request.method === 'GET' ? 'books.read' : 'books.update';
-        const book = await store.books.findByIdForUser(bookId, user.id);
-        if (!book) {
-          throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
-        }
-        if (request.method === 'PATCH') {
-          const changes = await readJsonBody(request);
-          validateBookPatchShape(changes);
-
-          if ('totalPages' in changes) {
-            const records = await store.readingRecords.listByUser(user.id);
-            if (records.some((record) => record.bookId === book.id)) {
-              throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Кількість сторінок не можна змінити після початку читання');
+        action = request.method === 'GET'
+          ? 'books.read'
+          : request.method === 'PATCH'
+            ? 'books.update'
+            : 'books.delete';
+        if (request.method === 'DELETE') {
+          await store.transaction(async (repositories) => {
+            const book = await repositories.books.findByIdForUserForUpdate(bookId, user.id);
+            if (!book) {
+              throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
             }
-          }
-          if ('rating' in changes && book.status !== 'прочитано') {
-            throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Рейтинг доступний лише для прочитаної книги');
-          }
-
-          const updatedBook = await store.books.updateForUser(book.id, user.id, changes);
-          if (!updatedBook) {
+            const deletedBook = await repositories.books.deleteForUser(book.id, user.id);
+            if (!deletedBook) {
+              throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+            }
+          });
+          status = 204;
+          outcome = 'success';
+          noContent = true;
+        } else {
+          const book = await store.books.findByIdForUser(bookId, user.id);
+          if (!book) {
             throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
           }
-          status = 200;
-          outcome = 'success';
-          body = { data: publicBook(updatedBook) };
-        } else {
-          status = 200;
-          outcome = 'success';
-          body = { data: publicBook(book) };
+          if (request.method === 'PATCH') {
+            const changes = await readJsonBody(request);
+            validateBookPatchShape(changes);
+
+            if ('totalPages' in changes) {
+              const records = await store.readingRecords.listByUser(user.id);
+              if (records.some((record) => record.bookId === book.id)) {
+                throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Кількість сторінок не можна змінити після початку читання');
+              }
+            }
+            if ('rating' in changes && book.status !== 'прочитано') {
+              throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Рейтинг доступний лише для прочитаної книги');
+            }
+
+            const updatedBook = await store.books.updateForUser(book.id, user.id, changes);
+            if (!updatedBook) {
+              throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+            }
+            status = 200;
+            outcome = 'success';
+            body = { data: publicBook(updatedBook) };
+          } else {
+            status = 200;
+            outcome = 'success';
+            body = { data: publicBook(book) };
+          }
         }
       }
     } else {

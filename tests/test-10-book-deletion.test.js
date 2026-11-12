@@ -186,10 +186,10 @@ test('TEST-10 / REQ-F-014, REQ-F-039: deleting a book removes it and all records
   });
   await assertProblem(records, 404, 'NOT_FOUND');
 
-  assert.equal(logger.events.at(-1).action, 'books.delete');
-  assert.equal(logger.events.at(-1).status, 204);
-  assert.equal(logger.events.at(-1).outcome, 'success');
-  assert.equal(Object.hasOwn(logger.events.at(-1), 'bookId'), false);
+  assert.equal(logger.events[0].action, 'books.delete');
+  assert.equal(logger.events[0].status, 204);
+  assert.equal(logger.events[0].outcome, 'success');
+  assert.equal(Object.hasOwn(logger.events[0], 'bookId'), false);
 });
 
 test('TEST-10 / REQ-F-001: deletion requires a session and hides foreign or missing books', async (t) => {

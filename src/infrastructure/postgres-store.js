@@ -163,6 +163,15 @@ function createRepositories(queryable) {
         );
         return rows[0] ? mapBook(rows[0]) : null;
       },
+      async deleteForUser(bookId, userId) {
+        const { rows } = await queryable.query(
+          `DELETE FROM books
+           WHERE id = $1 AND user_id = $2
+           RETURNING id`,
+          [bookId, userId],
+        );
+        return rows[0] ? { id: rows[0].id } : null;
+      },
       async updateStatusForUser(bookId, userId, status) {
         const { rows } = await queryable.query(
           `UPDATE books

@@ -1,0 +1,10 @@
+2026-11-12 | TEST-10 | GREEN
+Command: node --test tests/test-10-book-deletion.test.js
+Result: 4 tests, 4 passed, 0 failed, 0 skipped.
+Related regression: node --test tests/test-06-book-details.test.js tests/test-09-reading-record-management.test.js
+Related regression result: 29 tests, 28 passed, 0 failed, 1 skipped. The single skip is the TEST-06 PostgreSQL acceptance test requiring TEST_DATABASE_URL.
+Full regression command: npm test
+Full regression result: 90 tests, 87 passed, 0 failed, 3 skipped.
+Skip analysis: two TEST-01 and one TEST-06 PostgreSQL acceptance tests require TEST_DATABASE_URL, unavailable in this execution environment. TEST-GATE-10 records that the user declined adding a conditional PostgreSQL integration test and intends to run database tests in their terminal.
+Output review: owner-only deletion, 204 response, cascade removal from library/record data, equal 404 behavior for foreign/missing books, transaction rollback on injected cascade failure, action-log privacy, and confirmation/callback behavior passed. All executed tests from TEST-01 through TEST-10 passed.
+Worktree review: git diff --check passed. Existing unrelated changes in spec/traceability-matrix.md and untracked node_modules/ were left untouched.
