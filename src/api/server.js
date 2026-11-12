@@ -168,14 +168,40 @@ function validateReadingRecordShape(body) {
     );
   }
 
-  const errors = [];
-  for (const field of ALLOWED_READING_RECORD_FIELDS) {
-    if (!Number.isInteger(body[field]) || body[field] < 1) {
-      errors.push({ pointer: `/${field}`, code: 'required', message: 'заповніть дані' });
-    }
-  }
+  const errors = [...ALLOWED_READING_RECORD_FIELDS]
+    .filter((field) => !Object.hasOwn(body, field))
+    .map((field) => ({ pointer: `/${field}`, code: 'required', message: 'заповніть дані' }));
   if (errors.length > 0) {
     throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'заповніть дані', errors);
+  }
+
+  return body;
+}
+
+function validateReadingRecordRange(payload, book) {
+  const { startPage, endPage } = payload;
+  if (
+    !Number.isInteger(startPage) ||
+    !Number.isInteger(endPage) ||
+    startPage < 1 ||
+    endPage < 1 ||
+    startPage > book.totalPages ||
+    endPage > book.totalPages
+  ) {
+    throw new ApiProblem(
+      422,
+      'VALIDATION_ERROR',
+      'Unprocessable Content',
+      'Будь ласка, змініть сторінку',
+    );
+  }
+  if (endPage < startPage) {
+    throw new ApiProblem(
+      422,
+      'VALIDATION_ERROR',
+      'Unprocessable Content',
+      'Кінцева сторінка, менша за початкову',
+    );
   }
 }
 
@@ -395,18 +421,52 @@ async function handleRequest(request, response, { store, logger }) {
       action = 'reading-records.create';
       const user = await authenticateRequest(request, store);
       actorId = user.id;
-      const book = await store.books.findByIdForUser(readingRecordsPath[1], user.id);
-      if (!book) {
-        throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
-      }
-
       const payload = await readJsonBody(request);
       validateReadingRecordShape(payload);
-      const record = await store.readingRecords.create({
-        bookId: book.id,
-        startPage: payload.startPage,
-        endPage: payload.endPage,
-        date: getDateInKyiv(),
+      const record = await store.transaction(async (repositories) => {
+        const book = await repositories.books.findByIdForUserForUpdate(
+          readingRecordsPath[1],
+          user.id,
+        );
+        if (!book) {
+          throw new ApiProblem(404, 'NOT_FOUND', 'Not Found', 'Ресурс не знайдено');
+        }
+        if (book.status === 'прочитано') {
+          throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Книга вже прочитана');
+        }
+        validateReadingRecordRange(payload, book);
+
+        const existingRecords = (await repositories.readingRecords.listByUser(user.id))
+          .filter((item) => item.bookId === book.id);
+        if (existingRecords.some(
+          (item) => payload.startPage <= item.endPage && payload.endPage >= item.startPage,
+        )) {
+          throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Ці сторінки вже прочитані');
+        }
+
+        const expectedStartPage = existingRecords.length === 0
+          ? 1
+          : Math.max(...existingRecords.map((item) => item.endPage)) + 1;
+        if (payload.startPage !== expectedStartPage) {
+          throw new ApiProblem(409, 'STATE_CONFLICT', 'Конфлікт стану', 'Відсутні сторінки');
+        }
+
+        const createdRecord = await repositories.readingRecords.create({
+          bookId: book.id,
+          startPage: payload.startPage,
+          endPage: payload.endPage,
+          date: getDateInKyiv(),
+        });
+        const nextStatus = payload.endPage === book.totalPages ? 'прочитано' : 'читається';
+        const updatedBook = await repositories.books.updateStatusForUser(
+          book.id,
+          user.id,
+          nextStatus,
+        );
+        if (!updatedBook) {
+          throw new Error('Book disappeared during reading-record creation');
+        }
+        return createdRecord;
       });
       status = 201;
       outcome = 'success';

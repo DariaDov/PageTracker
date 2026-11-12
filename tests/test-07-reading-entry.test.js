@@ -82,6 +82,17 @@ function createMemoryStore({ failCreate = false } = {}) {
       async findByIdForUser(bookId, userId) {
         return books.find((book) => book.id === bookId && book.userId === userId) ?? null;
       },
+      async findByIdForUserForUpdate(bookId, userId) {
+        return books.find((book) => book.id === bookId && book.userId === userId) ?? null;
+      },
+      async updateStatusForUser(bookId, userId, status) {
+        const book = books.find((item) => item.id === bookId && item.userId === userId);
+        if (!book) {
+          return null;
+        }
+        book.status = status;
+        return book;
+      },
     },
     readingRecords: {
       async create({ bookId, startPage, endPage, date }) {
@@ -104,6 +115,9 @@ function createMemoryStore({ failCreate = false } = {}) {
           books.some((book) => book.id === record.bookId && book.userId === userId),
         );
       },
+    },
+    async transaction(operation) {
+      return operation(this);
     },
     bookRows: books,
     recordRows: records,

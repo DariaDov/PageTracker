@@ -153,6 +153,26 @@ function createRepositories(queryable) {
         );
         return rows[0] ? mapBook(rows[0]) : null;
       },
+      async findByIdForUserForUpdate(bookId, userId) {
+        const { rows } = await queryable.query(
+          `SELECT id, user_id, title, author, total_pages, status, rating
+           FROM books
+           WHERE id = $1 AND user_id = $2
+           FOR UPDATE`,
+          [bookId, userId],
+        );
+        return rows[0] ? mapBook(rows[0]) : null;
+      },
+      async updateStatusForUser(bookId, userId, status) {
+        const { rows } = await queryable.query(
+          `UPDATE books
+           SET status = $3
+           WHERE id = $1 AND user_id = $2
+           RETURNING id, user_id, title, author, total_pages, status, rating`,
+          [bookId, userId, status],
+        );
+        return rows[0] ? mapBook(rows[0]) : null;
+      },
       async updateForUser(bookId, userId, changes) {
         const columns = {
           title: 'title',

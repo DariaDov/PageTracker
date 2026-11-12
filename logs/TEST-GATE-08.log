@@ -6,3 +6,4 @@ TEST-GATE-08 approval includes the stated API behavior and scopes record update/
 PostgreSQL acceptance: user declined adding a repository conditional PostgreSQL integration test and intends to run database tests in their terminal.
 TDD gate: add and run tests before implementation; record corrected expected red results before coding.
 Red verification: 12 tests, 2 passed, 10 failed, 0 skipped. The passes cover a valid already-contiguous record and the existing action-log whitelist. Expected failures cover first-page/gap/overlap validation, field-specific page messages, status transitions/completion, completed-book rejection, and transactional rollback after status-update failure.
+2026-11-12 | VAL-08 | APPROVED by human. Targeted TEST-08: 12 passed. TEST-07 compatibility: 10 passed. Full regression: 72 passed, 0 failed, 3 PostgreSQL tests skipped because TEST_DATABASE_URL was unavailable in this execution environment. Human approved the TEST-08 green commit.

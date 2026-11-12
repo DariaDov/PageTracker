@@ -48,6 +48,9 @@ function createMemoryStore({ failStatusUpdate = false } = {}) {
       async findByIdForUser(bookId, userId) {
         return books.find((book) => book.id === bookId && book.userId === userId) ?? null;
       },
+      async findByIdForUserForUpdate(bookId, userId) {
+        return books.find((book) => book.id === bookId && book.userId === userId) ?? null;
+      },
       async updateStatusForUser(bookId, userId, status) {
         if (failStatusUpdate) {
           throw new Error('simulated status update failure');
