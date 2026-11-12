@@ -1,0 +1,7 @@
+2026-11-12 | TEST-06 | RED
+Command: node --test tests/test-06-book-details.test.js
+Final corrected red result: 17 tests, 2 passed, 15 failed, 0 skipped.
+Expected existing green behavior: missing-session requests are rejected (401); foreign and absent books return indistinguishable 404.
+Expected API gaps: GET details returns an object with internal userId instead of the OpenAPI public Book shape; PATCH requests are not implemented and currently return 404 rather than the specified validation, state-conflict, success, and safe-storage-failure outcomes.
+Expected UI gaps: src/ui/BookDetails.js does not exist; its six SSR/callback scenarios fail with MODULE_NOT_FOUND.
+Fixture correction: the initial test store accidentally shadowed its books repository with a book array and caused unrelated 500s. The corrected final baseline above was run after separating the fixture data from the repository. No TEST-06 feature implementation was present.

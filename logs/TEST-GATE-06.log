@@ -1,0 +1,7 @@
+2026-11-12 | TEST-GATE-06 | APPROVED by human
+Feature: FEAT-06 book details and editing.
+Requirements: REQ-F-005, REQ-F-013, REQ-F-028, REQ-I-003, REQ-I-018.
+API coverage: authenticated GET details; missing/foreign resource indistinguishable 404; PATCH metadata across statuses; page count change before first record and atomic 409 after reading starts; rating 1-5 only for completed books; validation, unknown/server-owned fields, storage failure, no partial updates, and action logging without request payload.
+UI coverage: server-rendered details show book metadata, status, rating, and records; metadata/page-count editing uses callbacks; rating control exists only for completed books. Reading record CRUD/sorting remains out of scope for TEST-06.
+TDD gate: add and run tests before implementation; record corrected expected red results before coding.
+Red verification: 17 tests, 2 passed, 15 failed, 0 skipped. The two passing existing behaviors are session enforcement and the indistinguishable 404 for foreign/missing books.
