@@ -301,6 +301,26 @@ test('TEST-11 / REQ-F-040: storage failures return a safe logged 500', async (t)
   assert.equal(logger.events.at(-1).outcome, 'failure');
 });
 
+test('TEST-11 / REQ-NF-002: ten concurrent statistics requests complete within two seconds', async (t) => {
+  const { baseUrl } = await startApi(t);
+  const startedAt = performance.now();
+  const responses = await Promise.all(
+    Array.from({ length: 10 }, () => getStatistics(baseUrl)),
+  );
+  const results = await Promise.all(responses.map(async (response) => {
+    assert.equal(response.status, 200);
+    return response.json();
+  }));
+  const elapsedMilliseconds = performance.now() - startedAt;
+
+  assert.ok(
+    elapsedMilliseconds <= 2000,
+    `10 concurrent statistics requests took ${elapsedMilliseconds}ms`,
+  );
+  assert.equal(results.length, 10);
+  assert.ok(results.every((result) => result.data.period.type === 'week'));
+});
+
 function findElement(node, predicate) {
   if (!React.isValidElement(node)) {
     return null;
@@ -338,6 +358,12 @@ test('TEST-11 / REQ-I-005: statistics page renders data, empty/error states, and
   assert.match(markup, /2025-11-30/);
   assert.match(markup, /Середнє за день: 1/);
   assert.match(markup, /Днів у періоді: 30/);
+  const defaultMarkup = renderToStaticMarkup(React.createElement(StatisticsDashboard, {
+    ...props,
+    selectedPeriod: 'week',
+    selectedDate: undefined,
+  }));
+  assert.match(defaultMarkup, new RegExp(`value="${getDateInKyiv()}"`));
 
   const tree = element.type(element.props);
   const form = findElement(tree, (candidate) =>

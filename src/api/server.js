@@ -5,6 +5,11 @@ const { createHash, randomBytes } = require('node:crypto');
 const { verifyPassword } = require('../security/password-hasher.js');
 const { createActionLogger } = require('../observability/action-logger.js');
 const { RegistrationError, registerUser } = require('../application/registration-service.js');
+const {
+  StatisticsQueryError,
+  calculateStatistics,
+  resolveStatisticsPeriod,
+} = require('../application/statistics-service.js');
 const { getDateInKyiv } = require('../time/kyiv-date.js');
 
 const REGISTER_PATH = '/api/auth/register';
@@ -462,6 +467,28 @@ async function handleRequest(request, response, { store, logger }) {
       outcome = 'success';
       noContent = true;
       responseHeaders['set-cookie'] = clearedSessionCookie();
+    } else if (pathname === '/api/statistics' && request.method === 'GET') {
+      action = 'statistics.read';
+      const user = await authenticateRequest(request, store);
+      actorId = user.id;
+      const today = getDateInKyiv();
+      let period;
+      try {
+        period = resolveStatisticsPeriod({
+          period: url.searchParams.get('period'),
+          date: url.searchParams.get('date'),
+          today,
+        });
+      } catch (error) {
+        if (!(error instanceof StatisticsQueryError)) {
+          throw error;
+        }
+        throw new ApiProblem(400, 'INVALID_PARAMETER', 'Некоректний параметр', error.message);
+      }
+      const records = await store.readingRecords.listByUser(user.id);
+      status = 200;
+      outcome = 'success';
+      body = { data: calculateStatistics(records, period, today) };
     } else if (readingRecordsPath && request.method === 'GET') {
       action = 'reading-records.list';
       const user = await authenticateRequest(request, store);
