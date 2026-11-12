@@ -1,0 +1,14 @@
+✔ REQ-NF-003: password hashes are not plaintext and can be verified (109.330158ms)
+✔ REQ-NF-006: failed work rolls back and releases its database connection (1.728336ms)
+✔ Europe/Kyiv date conversion handles the UTC date boundary (25.239063ms)
+✔ REQ-NF-004 / REQ-NF-007: PostgreSQL data persists across store instances at planned capacity (820.014289ms)
+✔ REQ-NF-006: a failed database transaction leaves no partial book data (9.704435ms)
+✔ Action logging: structured events exclude credentials and session secrets (1.150091ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1025.093702
