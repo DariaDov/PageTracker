@@ -9,3 +9,8 @@ Regression command: npm test
 Regression result: 24 tests, 22 passed, 0 failed, 2 skipped.
 Skip analysis: both skipped tests require TEST_DATABASE_URL and are PostgreSQL acceptance tests (capacity/persistence and transaction atomicity); no PostgreSQL tests ran in this environment.
 Regression log review: all executed foundation, TEST-02, TEST-03, and TEST-04 tests passed; the only skips were explicitly reported for the unavailable TEST_DATABASE_URL.
+2026-11-12 17:22 +02:00 | User-provided full regression result
+Command: npm test (reported by user; not run by assistant in this environment)
+Result: 24 tests, 24 passed, 0 failed, 0 skipped.
+PostgreSQL acceptance: persistence/capacity and transaction atomicity both passed; TEST_DATABASE_URL was available in the user's test environment.
+Coverage: TEST-01 foundation, TEST-02 registration, TEST-03 access/session, and TEST-04 navigation.
