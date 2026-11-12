@@ -1,0 +1,15 @@
+✔ TEST-03 / REQ-F-020, REQ-I-009, REQ-NF-003, REQ-NF-005: successful login returns public user and persistent secure session cookie (118.192595ms)
+✔ TEST-03 / REQ-F-030: unknown email and wrong password produce indistinguishable login failures without a cookie (81.438238ms)
+✔ TEST-03 / REQ-F-001, REQ-NF-005: protected resources reject absent and unknown sessions (8.45295ms)
+✔ TEST-03 / REQ-F-001: authenticated users can list and read only their own books (107.207459ms)
+✔ TEST-03 / REQ-F-029, REQ-NF-005, API-CL-04: logout invalidates session, clears cookie, and is idempotent (69.320694ms)
+✔ TEST-03 / action logging: authentication logs do not include passwords or session tokens (65.81388ms)
+✔ TEST-03 / session storage: raw session tokens are never used as stored keys (63.131789ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 581.292043

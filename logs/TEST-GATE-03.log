@@ -4,5 +4,8 @@ Scope: REQ-F-001, REQ-F-020, REQ-F-029, REQ-F-030, REQ-NF-003, REQ-NF-005; API-C
 Scenarios: successful login and persistent Secure/HttpOnly/SameSite=Lax cookie; same 401 for unknown email and wrong password; absent/unknown session rejected; A can access only A's books and cannot read/update B's book; logout invalidates session, clears cookie, and is idempotent; session secrets excluded from logs; raw tokens not stored.
 Test integration contract: createApiServer({ store, logger }); store.sessions.create({ userId, tokenHash }), findByTokenHash(tokenHash), deleteByTokenHash(tokenHash).
 Red baseline: 7 tests, 0 passed, 7 failed, 0 skipped. Failures are expected because login/logout/protected-resource routes are not implemented and currently return 404.
-Human approval authorizes FEAT-03 implementation after committing the red stage. VER-03, VAL-03, and GATE-03 remain pending.
+Human approval authorized FEAT-03 implementation after committing the red stage.
+VER-03 full regression (user terminal, 2026-11-12): 21 tests, 21 passed, 0 failed, 0 skipped.
+VAL-03 accepted by human (2026-11-12): authentication, session, logout, and access-isolation behavior accepted within TEST-03 scope.
+Project GATE-03 approved by human (2026-11-12): TEST-04 preparation authorized; implementation still requires TEST-GATE-04.
 Commit workflow per human direction: create separate red-stage and green-stage commits for each TEST, including all new files and changes belonging to that stage.

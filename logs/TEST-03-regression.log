@@ -1,0 +1,29 @@
+✔ REQ-NF-003: password hashes are not plaintext and can be verified (126.035122ms)
+✔ REQ-NF-006: failed work rolls back and releases its database connection (1.67896ms)
+✔ Europe/Kyiv date conversion handles the UTC date boundary (12.618451ms)
+✔ REQ-NF-004 / REQ-NF-007: PostgreSQL data persists across store instances at planned capacity (900.953755ms)
+✔ REQ-NF-006: a failed database transaction leaves no partial book data (10.43522ms)
+✔ Action logging: structured events exclude credentials and session secrets (0.948478ms)
+✔ TEST-02 / REQ-F-019, REQ-F-022, REQ-F-023, REQ-F-041: registration creates a public account without starting a session (134.949614ms)
+✔ TEST-02 / REQ-F-021: email uniqueness is case-sensitive (100.693008ms)
+✔ TEST-02 / REQ-F-042: missing and whitespace-only credentials are rejected without storing an account (13.12133ms)
+✔ TEST-02 / REQ-F-030, API-CL-08: duplicate exact email returns the approved conflict without a second account (50.995892ms)
+✔ TEST-02 / API-CL-05, API-CL-06: malformed JSON returns the shared 400 problem response without mutation (3.013123ms)
+✔ TEST-02 / API-CL-09: unknown request fields are rejected without mutation (3.801957ms)
+✔ TEST-02 / OpenAPI 500: storage failure returns a safe problem response without partial account data (37.294616ms)
+✔ TEST-02 / action logging: successful and rejected registration requests are logged without credentials (44.063358ms)
+✔ TEST-03 / REQ-F-020, REQ-I-009, REQ-NF-003, REQ-NF-005: successful login returns public user and persistent secure session cookie (130.406434ms)
+✔ TEST-03 / REQ-F-030: unknown email and wrong password produce indistinguishable login failures without a cookie (94.909674ms)
+✔ TEST-03 / REQ-F-001, REQ-NF-005: protected resources reject absent and unknown sessions (13.763063ms)
+✔ TEST-03 / REQ-F-001: authenticated users can list and read only their own books (126.258679ms)
+✔ TEST-03 / REQ-F-029, REQ-NF-005, API-CL-04: logout invalidates session, clears cookie, and is idempotent (79.032983ms)
+✔ TEST-03 / action logging: authentication logs do not include passwords or session tokens (68.807442ms)
+✔ TEST-03 / session storage: raw session tokens are never used as stored keys (60.406419ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1126.291214

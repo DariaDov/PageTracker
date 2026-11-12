@@ -12,6 +12,14 @@ const MIGRATIONS = `
     created_at timestamptz NOT NULL DEFAULT now()
   );
 
+  CREATE TABLE IF NOT EXISTS sessions (
+    token_hash text PRIMARY KEY,
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at timestamptz NOT NULL DEFAULT now()
+  );
+
+  CREATE INDEX IF NOT EXISTS sessions_user_id_idx ON sessions(user_id);
+
   CREATE TABLE IF NOT EXISTS books (
     id uuid PRIMARY KEY,
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -87,8 +95,33 @@ function createRepositories(queryable) {
         );
         return mapUser(rows[0]);
       },
+      async findById(id) {
+        const { rows } = await queryable.query(
+          'SELECT id, email, password_hash FROM users WHERE id = $1',
+          [id],
+        );
+        return mapUser(rows[0]);
+      },
       async deleteById(id) {
         await queryable.query('DELETE FROM users WHERE id = $1', [id]);
+      },
+    },
+    sessions: {
+      async create({ userId, tokenHash }) {
+        await queryable.query(
+          'INSERT INTO sessions (token_hash, user_id) VALUES ($1, $2)',
+          [tokenHash, userId],
+        );
+      },
+      async findByTokenHash(tokenHash) {
+        const { rows } = await queryable.query(
+          'SELECT token_hash, user_id FROM sessions WHERE token_hash = $1',
+          [tokenHash],
+        );
+        return rows[0] ? { tokenHash: rows[0].token_hash, userId: rows[0].user_id } : null;
+      },
+      async deleteByTokenHash(tokenHash) {
+        await queryable.query('DELETE FROM sessions WHERE token_hash = $1', [tokenHash]);
       },
     },
     books: {
@@ -110,6 +143,15 @@ function createRepositories(queryable) {
           [userId],
         );
         return rows.map(mapBook);
+      },
+      async findByIdForUser(bookId, userId) {
+        const { rows } = await queryable.query(
+          `SELECT id, user_id, title, author, total_pages, status, rating
+           FROM books
+           WHERE id = $1 AND user_id = $2`,
+          [bookId, userId],
+        );
+        return rows[0] ? mapBook(rows[0]) : null;
       },
     },
     readingRecords: {

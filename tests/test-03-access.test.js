@@ -20,6 +20,9 @@ function createMemoryStore() {
       async findByEmail(email) {
         return users.find((user) => user.email === email) ?? null;
       },
+      async findById(id) {
+        return users.find((user) => user.id === id) ?? null;
+      },
     },
     sessions: {
       async create({ userId, tokenHash }) {
