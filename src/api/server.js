@@ -20,6 +20,8 @@ const ALLOWED_REGISTRATION_FIELDS = new Set(['email', 'password']);
 const ALLOWED_BOOK_FIELDS = new Set(['title', 'author', 'totalPages']);
 const ALLOWED_BOOK_PATCH_FIELDS = new Set(['title', 'author', 'totalPages', 'rating']);
 const ALLOWED_READING_RECORD_FIELDS = new Set(['startPage', 'endPage']);
+const ALLOWED_READING_GOAL_FIELDS = new Set(['targetPages']);
+const READING_GOAL_PERIODS = new Set(['week', 'month']);
 
 class ApiProblem extends Error {
   constructor(status, code, title, detail, errors) {
@@ -205,6 +207,54 @@ function validateReadingRecordPatchShape(body) {
       })),
     );
   }
+}
+
+function validateReadingGoalPeriod(period) {
+  if (!READING_GOAL_PERIODS.has(period)) {
+    throw new ApiProblem(
+      422,
+      'VALIDATION_ERROR',
+      'Unprocessable Content',
+      'Період цілі має бути week або month',
+    );
+  }
+}
+
+function validateReadingGoalShape(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    throw new ApiProblem(422, 'VALIDATION_ERROR', 'Unprocessable Content', 'Некоректна ціль читання');
+  }
+
+  const errors = [];
+  for (const field of Object.keys(body)) {
+    if (!ALLOWED_READING_GOAL_FIELDS.has(field)) {
+      errors.push({ pointer: `/${field}`, code: 'unknown_field', message: 'Невідоме поле запиту' });
+    }
+  }
+  if (!Object.hasOwn(body, 'targetPages')) {
+    errors.push({ pointer: '/targetPages', code: 'required', message: 'Вкажіть ціль у сторінках' });
+  } else if (
+    !Number.isInteger(body.targetPages) ||
+    body.targetPages < 1 ||
+    body.targetPages > 2147483647
+  ) {
+    errors.push({
+      pointer: '/targetPages',
+      code: 'range',
+      message: 'Ціль має бути цілим числом від 1 до 2147483647',
+    });
+  }
+
+  if (errors.length > 0) {
+    throw new ApiProblem(
+      422,
+      'VALIDATION_ERROR',
+      'Unprocessable Content',
+      'Некоректна ціль читання',
+      errors,
+    );
+  }
+  return body;
 }
 
 function validateReadingRecordRange(payload, book) {
@@ -408,6 +458,7 @@ async function handleRequest(request, response, { store, logger }) {
   const pathname = url.pathname;
   const readingRecordsPath = pathname.match(/^\/api\/books\/([^/]+)\/reading-records$/);
   const readingRecordPath = pathname.match(/^\/api\/reading-records\/([^/]+)$/);
+  const readingGoalPath = pathname.match(/^\/api\/reading-goals\/([^/]+)$/);
   let status = 500;
   let outcome = 'failure';
   let body;
@@ -486,9 +537,74 @@ async function handleRequest(request, response, { store, logger }) {
         throw new ApiProblem(400, 'INVALID_PARAMETER', 'Некоректний параметр', error.message);
       }
       const records = await store.readingRecords.listByUser(user.id);
+      const statistics = calculateStatistics(records, period, today);
+      if (period.type === 'week' || period.type === 'month') {
+        const currentPeriod = resolveStatisticsPeriod({ period: period.type, today });
+        const isCurrentPeriod =
+          period.startDate === currentPeriod.startDate &&
+          period.endDate === currentPeriod.endDate;
+        if (isCurrentPeriod) {
+          const goals = await store.readingGoals.listByUser(user.id);
+          const goal = goals.find((item) => item.period === period.type);
+          if (goal) {
+            const pagesRead = statistics.pagesReadTotal;
+            statistics.goalProgress = {
+              targetPages: goal.targetPages,
+              pagesRead,
+              remainingPages: Math.max(goal.targetPages - pagesRead, 0),
+              percentage: (pagesRead / goal.targetPages) * 100,
+              achieved: pagesRead >= goal.targetPages,
+            };
+          }
+        }
+      }
       status = 200;
       outcome = 'success';
-      body = { data: calculateStatistics(records, period, today) };
+      body = { data: statistics };
+    } else if (pathname === '/api/reading-goals' && request.method === 'GET') {
+      action = 'reading-goals.read';
+      const user = await authenticateRequest(request, store);
+      actorId = user.id;
+      const goals = await store.readingGoals.listByUser(user.id);
+      const goalByPeriod = new Map(goals.map((goal) => [goal.period, goal]));
+      status = 200;
+      outcome = 'success';
+      body = {
+        data: {
+          week: goalByPeriod.has('week')
+            ? { targetPages: goalByPeriod.get('week').targetPages }
+            : null,
+          month: goalByPeriod.has('month')
+            ? { targetPages: goalByPeriod.get('month').targetPages }
+            : null,
+        },
+      };
+    } else if (
+      readingGoalPath &&
+      ['PUT', 'DELETE'].includes(request.method)
+    ) {
+      action = request.method === 'PUT' ? 'reading-goals.update' : 'reading-goals.delete';
+      const user = await authenticateRequest(request, store);
+      actorId = user.id;
+      const period = readingGoalPath[1];
+      validateReadingGoalPeriod(period);
+
+      if (request.method === 'PUT') {
+        const payload = validateReadingGoalShape(await readJsonBody(request));
+        const goal = await store.transaction((repositories) =>
+          repositories.readingGoals.upsertForUser(user.id, period, payload.targetPages),
+        );
+        status = 200;
+        outcome = 'success';
+        body = { data: { targetPages: goal.targetPages } };
+      } else {
+        await store.transaction((repositories) =>
+          repositories.readingGoals.deleteForUser(period, user.id),
+        );
+        status = 204;
+        outcome = 'success';
+        noContent = true;
+      }
     } else if (readingRecordsPath && request.method === 'GET') {
       action = 'reading-records.list';
       const user = await authenticateRequest(request, store);

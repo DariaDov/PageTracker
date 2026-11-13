@@ -42,6 +42,13 @@ const MIGRATIONS = `
     date date NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS reading_goals (
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    period text NOT NULL CHECK (period IN ('week', 'month')),
+    target_pages integer NOT NULL CHECK (target_pages BETWEEN 1 AND 2147483647),
+    PRIMARY KEY (user_id, period)
+  );
+
   CREATE INDEX IF NOT EXISTS books_user_id_idx ON books(user_id);
   CREATE INDEX IF NOT EXISTS reading_records_book_id_date_idx
     ON reading_records(book_id, date, start_page);
@@ -74,6 +81,17 @@ function mapReadingRecord(row) {
     endPage: row.end_page,
     pagesRead: row.pages_read,
     date: mapCalendarDate(row.date),
+  };
+}
+
+function mapReadingGoal(row) {
+  if (!row) {
+    return null;
+  }
+  return {
+    userId: row.user_id,
+    period: row.period,
+    targetPages: row.target_pages,
   };
 }
 
@@ -261,6 +279,37 @@ function createRepositories(queryable) {
           [recordId, userId],
         );
         return rows[0] ? mapReadingRecord(rows[0]) : null;
+      },
+    },
+    readingGoals: {
+      async listByUser(userId) {
+        const { rows } = await queryable.query(
+          `SELECT user_id, period, target_pages
+           FROM reading_goals
+           WHERE user_id = $1`,
+          [userId],
+        );
+        return rows.map(mapReadingGoal);
+      },
+      async upsertForUser(userId, period, targetPages) {
+        const { rows } = await queryable.query(
+          `INSERT INTO reading_goals (user_id, period, target_pages)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (user_id, period)
+           DO UPDATE SET target_pages = EXCLUDED.target_pages
+           RETURNING user_id, period, target_pages`,
+          [userId, period, targetPages],
+        );
+        return mapReadingGoal(rows[0]);
+      },
+      async deleteForUser(period, userId) {
+        const { rows } = await queryable.query(
+          `DELETE FROM reading_goals
+           WHERE period = $1 AND user_id = $2
+           RETURNING user_id, period, target_pages`,
+          [period, userId],
+        );
+        return mapReadingGoal(rows[0]);
       },
     },
   };

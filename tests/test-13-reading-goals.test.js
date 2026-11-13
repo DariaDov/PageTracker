@@ -282,6 +282,11 @@ test('TEST-13 / REQ-F-044, REQ-NF-010: invalid goal values and periods are rejec
   );
   await assertProblem(await setGoal(baseUrl, 'year', 100), 422, 'VALIDATION_ERROR');
   await assertProblem(
+    await request(baseUrl, '/reading-goals/%E0%A4%A', 'DELETE'),
+    422,
+    'VALIDATION_ERROR',
+  );
+  await assertProblem(
     await request(baseUrl, '/reading-goals/year', 'DELETE'),
     422,
     'VALIDATION_ERROR',
@@ -486,7 +491,7 @@ test('TEST-13 / REQ-I-020: statistics UI shows goal progress and allows setting 
   const { StatisticsDashboard } = require('../src/ui/StatisticsDashboard.js');
   const element = React.createElement(StatisticsDashboard, props);
   const markup = renderToStaticMarkup(element);
-  assert.match(markup, /Ціль читання/);
+  assert.match(markup, /Цілі читання/);
   assert.match(markup, /100/);
   assert.match(markup, /40/);
   assert.match(markup, /60/);

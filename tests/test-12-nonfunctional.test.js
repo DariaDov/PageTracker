@@ -69,6 +69,11 @@ function createLoadStore(users, books) {
         return record;
       },
     },
+    readingGoals: {
+      async listByUser() {
+        return [];
+      },
+    },
   };
   return {
     ...repositories,

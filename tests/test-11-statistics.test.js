@@ -90,6 +90,11 @@ function createMemoryStore({ failList = false } = {}) {
         );
       },
     },
+    readingGoals: {
+      async listByUser() {
+        return [];
+      },
+    },
     recordRows: records,
     seedRecord({ bookId = 'book-a', date, pagesRead }) {
       records.push({ id: randomUUID(), bookId, date, pagesRead });
