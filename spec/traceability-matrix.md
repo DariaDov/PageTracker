@@ -143,3 +143,23 @@
 | API-CL-12 | REQ-I-015…016 | `GET /books`, `GET /books/{bookId}/reading-records` | «Отримання бібліотеки повертає лише книги власника», «Отримання записів повертає визначений порядок», «Некоректний номер сторінки бібліотеки» | Параметри й відповіді списків у [openapi.yaml](./openapi.yaml) | Частково: контракт параметрів/схем перевіряється; розмір сторінки, навігацію та сортування даних mock не виконує |
 
 **Підсумок API-GATE:** простежуваність API задокументована, а OpenAPI YAML/JSON проходять автоматичну валідацію. Критерій 10 не виконано повністю: Prism повертає контрактні приклади, але не моделює стан і ключові бізнес-правила. Повне проходження API-GATE не підтверджено.
+
+## Вимоги схваленого адендуму «Цілі читання»
+
+Вимоги цього розділу є нормативними за [окремим адендумом](./reading-goals-addendum.md) і не змінюють базовий SRS v1.0. TEST-13 створено та підтверджено RED; код залишається порожнім до окремого дозволу на FEAT-12.
+
+| ID вимоги | Критерій прийняття | Тікет | Тест | Код | Документація |
+| --- | --- | --- | --- | --- | --- |
+| REQ-F-044 | Власник окремо налаштовує, читає, змінює та прибирає повторювані тижневу/місячну ціль у діапазоні 1…2147483647; значення зберігається між сесіями та періодами. | SPEC-ADDENDUM-GATE-02 → TEST-GATE-13 → TEST-13 → FEAT-12 → VER-13 → VAL-13 → GATE-14 | [TEST-13](../tests/test-13-reading-goals.test.js): RED; PostgreSQL persistence пропущено без `TEST_DATABASE_URL` | Очікує FEAT-12 | [Адендум](./reading-goals-addendum.md), [OpenAPI](./openapi.yaml) |
+| REQ-F-045 | Прогрес лише поточного тижня/місяця використовує суму актуальних сторінок читання власника, календарні межі Europe/Kyiv, залишок ≥0, необмежений відсоток і ознаку досягнення. | SPEC-ADDENDUM-GATE-02 → TEST-GATE-13 → TEST-13 → FEAT-12 → VER-13 → VAL-13 → GATE-14 | [TEST-13](../tests/test-13-reading-goals.test.js): RED | Очікує FEAT-12 | [Адендум](./reading-goals-addendum.md), [OpenAPI](./openapi.yaml) |
+| REQ-I-020 | На статистиці українською можна налаштувати/прибрати обидві цілі та побачити прогрес поточного періоду. | SPEC-ADDENDUM-GATE-02 → TEST-GATE-13 → TEST-13 → FEAT-12 → VER-13 → VAL-13 → GATE-14 | [TEST-13](../tests/test-13-reading-goals.test.js): RED | Очікує FEAT-12 | [Адендум](./reading-goals-addendum.md) |
+| REQ-NF-010 | Помилка зміни/видалення не залишає часткового стану цілі. | SPEC-ADDENDUM-GATE-02 → TEST-GATE-13 → TEST-13 → FEAT-12 → VER-13 → VAL-13 → GATE-14 | [TEST-13](../tests/test-13-reading-goals.test.js): RED | Очікує FEAT-12 | [Адендум](./reading-goals-addendum.md), [OpenAPI](./openapi.yaml) |
+
+## API-контракт адендуму
+
+| API operation | REQ-ID адендуму | Сценарії | Контракт |
+| --- | --- | --- | --- |
+| `GET /reading-goals` | REQ-F-001, REQ-F-044 | Перегляд власних цілей; відсутність цілі повертається як `null`; ізоляція користувачів | `ReadingGoals` у [openapi.yaml](./openapi.yaml) |
+| `PUT /reading-goals/{period}` | REQ-F-001, REQ-F-044, REQ-NF-010 | Створення/заміна тижневої або місячної цілі; валідація меж; атомарність | `ReadingGoalUpdate` та `GoalPeriod` у [openapi.yaml](./openapi.yaml) |
+| `DELETE /reading-goals/{period}` | REQ-F-001, REQ-F-044, REQ-NF-010 | Ідемпотентне видалення обраної цілі без зміни іншої | `DELETE` у [openapi.yaml](./openapi.yaml) |
+| `GET /statistics` | REQ-F-001, REQ-F-045, REQ-I-020 | Поточний період, оновлення за зміни записів/книг, точні календарні межі | Необов'язковий `goalProgress` у схемі `Statistics` |

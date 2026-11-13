@@ -1,9 +1,10 @@
 openapi: 3.1.0
 info:
   title: PageTracker REST API
-  version: 1.0.0
+  version: 1.1.0
   description: >-
-    Контракт REST API PageTracker, узгоджений із SRS v1.0. Усі дати є
+    Контракт REST API PageTracker, узгоджений із SRS v1.0 та схваленим
+    адендумом «Цілі читання». Усі дати є
     календарними датами в Europe/Kyiv. Власник даних визначається з активної
     сесії; API не приймає ownerId від клієнта. API-CL-01…12 у
     spec/api-contract-addendum.md погоджені на API-GATE 2026-10-30.
@@ -19,6 +20,8 @@ tags:
     description: Записи читання книг
   - name: Statistics
     description: Похідна статистика за календарний період
+  - name: Reading goals
+    description: Повторювані тижневі та місячні цілі читання
 paths:
   /auth/register:
     post:
@@ -513,6 +516,83 @@ paths:
           $ref: '#/components/responses/StateConflict'
         '500':
           $ref: '#/components/responses/InternalError'
+  /reading-goals:
+    get:
+      tags: [Reading goals]
+      operationId: getReadingGoals
+      summary: Отримати налаштовані цілі читання
+      description: Повертає лише цілі поточного користувача.
+      x-requirement-ids: [REQ-F-001, REQ-F-044]
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Налаштовані цілі; null означає, що ціль періоду не задана.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ReadingGoals'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /reading-goals/{period}:
+    parameters:
+      - $ref: '#/components/parameters/GoalPeriod'
+    put:
+      tags: [Reading goals]
+      operationId: setReadingGoal
+      summary: Задати або змінити ціль читання
+      description: Ціль повторюється для кожного тижня або місяця відповідного типу.
+      x-requirement-ids: [REQ-F-001, REQ-F-044, REQ-NF-004, REQ-NF-010]
+      security:
+        - SessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadingGoalUpdate'
+      responses:
+        '200':
+          description: Ціль створено або оновлено.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ReadingGoal'
+        '400':
+          $ref: '#/components/responses/InvalidJson'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Reading goals]
+      operationId: deleteReadingGoal
+      summary: Прибрати ціль читання
+      description: Ідемпотентно прибирає ціль зазначеного періоду.
+      x-requirement-ids: [REQ-F-001, REQ-F-044, REQ-NF-010]
+      security:
+        - SessionCookie: []
+      responses:
+        '204':
+          description: Ціль періоду прибрана або вже була відсутня.
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /statistics:
     get:
       tags: [Statistics]
@@ -530,6 +610,7 @@ paths:
         - REQ-F-018
         - REQ-F-038
         - REQ-F-040
+        - REQ-F-045
         - REQ-I-005
         - REQ-NF-002
       security:
@@ -552,7 +633,9 @@ paths:
             example: '2026-10-30'
       responses:
         '200':
-          description: Статистика періоду, у тому числі порожній стан.
+          description: >-
+            Статистика періоду, у тому числі порожній стан. Для поточного
+            тижня/місяця може містити goalProgress налаштованої цілі.
           content:
             application/json:
               schema:
@@ -573,6 +656,12 @@ paths:
                       pagesReadTotal: 20
                       hasData: true
                       averagePagesPerDay: 4
+                      goalProgress:
+                        targetPages: 100
+                        pagesRead: 40
+                        remainingPages: 60
+                        percentage: 40
+                        achieved: false
                 empty:
                   value:
                     data:
@@ -642,6 +731,14 @@ components:
       description: Ідентифікатор запису; запис має належати поточному користувачу.
       schema:
         $ref: '#/components/schemas/Id'
+    GoalPeriod:
+      name: period
+      in: path
+      required: true
+      description: Тип повторюваної цілі читання.
+      schema:
+        type: string
+        enum: [week, month]
   responses:
     InvalidJson:
       description: Тіло запиту не є коректним JSON.
@@ -880,6 +977,58 @@ components:
         endDate:
           type: string
           format: date
+    ReadingGoal:
+      type: object
+      additionalProperties: false
+      required: [targetPages]
+      properties:
+        targetPages:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+    ReadingGoals:
+      type: object
+      additionalProperties: false
+      required: [week, month]
+      properties:
+        week:
+          oneOf:
+            - $ref: '#/components/schemas/ReadingGoal'
+            - type: 'null'
+        month:
+          oneOf:
+            - $ref: '#/components/schemas/ReadingGoal'
+            - type: 'null'
+    ReadingGoalUpdate:
+      type: object
+      additionalProperties: false
+      required: [targetPages]
+      properties:
+        targetPages:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+    GoalProgress:
+      type: object
+      additionalProperties: false
+      required: [targetPages, pagesRead, remainingPages, percentage, achieved]
+      properties:
+        targetPages:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        pagesRead:
+          type: integer
+          minimum: 0
+        remainingPages:
+          type: integer
+          minimum: 0
+        percentage:
+          type: number
+          minimum: 0
+          description: Відсоток може перевищувати 100.
+        achieved:
+          type: boolean
     Statistics:
       type: object
       additionalProperties: false
@@ -904,6 +1053,9 @@ components:
           type: string
           const: Щоб побачити статистику, додайте новий запис
           description: Повертається лише якщо hasData дорівнює false.
+        goalProgress:
+          $ref: '#/components/schemas/GoalProgress'
+          description: Повертається для налаштованої цілі поточного тижня або місяця.
       allOf:
         - if:
             properties:
