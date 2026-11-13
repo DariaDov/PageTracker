@@ -20,3 +20,16 @@
 ℹ skipped 0
 ℹ todo 0
 ℹ duration_ms 1005.124136
+
+Full project regression after FEAT-12
+Run date: 2026-11-13
+Result provided by the user from their terminal.
+
+ℹ tests 116
+ℹ suites 0
+ℹ pass 116
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1702.693067
