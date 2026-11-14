@@ -1,16 +1,15 @@
 ✖ REQ-NF-003: password hashes are not plaintext and can be verified (4.449727ms)
 ✖ REQ-NF-006: failed work rolls back and releases its database connection (1.508063ms)
-﹣ REQ-I-001 / REQ-NF-003: browser application is served over HTTPS (0.54553ms) # Set TEST_TLS_KEY and TEST_TLS_CERT to run HTTPS acceptance tests.
 ✖ Europe/Kyiv date conversion handles the UTC date boundary (0.958787ms)
 ﹣ REQ-NF-004 / REQ-NF-007: PostgreSQL data persists across store instances at planned capacity (0.525171ms) # Set TEST_DATABASE_URL to run PostgreSQL acceptance tests.
 ﹣ REQ-NF-006: a failed database transaction leaves no partial book data (0.476898ms) # Set TEST_DATABASE_URL to run PostgreSQL acceptance tests.
 ✖ Action logging: structured events exclude credentials and session secrets (1.016176ms)
-ℹ tests 7
+ℹ tests 6
 ℹ suites 0
 ℹ pass 0
 ℹ fail 4
 ℹ cancelled 0
-ℹ skipped 3
+ℹ skipped 2
 ℹ todo 0
 ℹ duration_ms 268.480431
 

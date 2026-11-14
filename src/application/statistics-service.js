@@ -1,7 +1,14 @@
 'use strict';
 
+/**
+ * @fileoverview Calendar-period resolution and reading-statistics calculation.
+ */
+
 const EMPTY_STATISTICS_MESSAGE = 'Щоб побачити статистику, додайте новий запис';
 
+/**
+ * Indicates an invalid date or unsupported statistics period.
+ */
 class StatisticsQueryError extends Error {}
 
 function parseCalendarDate(value) {
@@ -55,6 +62,21 @@ function getPeriodBounds(period, referenceDate) {
   };
 }
 
+/**
+ * Resolves an ISO calendar date and period into inclusive date bounds.
+ *
+ * Weeks start on Monday. Omitted period defaults to `week`; omitted reference
+ * date defaults to `today`. A period starting after today is rejected.
+ *
+ * @param {object} options Query selection.
+ * @param {'week'|'month'|'year'} [options.period='week'] Period to resolve.
+ * @param {string} [options.date] Reference date in YYYY-MM-DD form.
+ * @param {string} options.today Current date in YYYY-MM-DD form.
+ * @returns {{type: 'week'|'month'|'year', startDate: string, endDate: string}}
+ *   Inclusive calendar bounds in YYYY-MM-DD form.
+ * @throws {StatisticsQueryError} If a period is unsupported, either date is
+ *   invalid, or the selected period is in the future.
+ */
 function resolveStatisticsPeriod({ period, date, today }) {
   const selectedPeriod = period ?? 'week';
   if (!['week', 'month', 'year'].includes(selectedPeriod)) {
@@ -70,6 +92,21 @@ function resolveStatisticsPeriod({ period, date, today }) {
   return { type: selectedPeriod, ...bounds };
 }
 
+/**
+ * Calculates totals and the rounded daily average for a resolved period.
+ *
+ * Records outside the period or later than today are ignored. Days counted
+ * runs from the period start through the earlier of its end and today, so
+ * incomplete current periods do not include future days in the average.
+ *
+ * @param {Array<{date: string, pagesRead: number}>} records Reading records.
+ * @param {{type: string, startDate: string, endDate: string}} period Resolved
+ *   inclusive period bounds.
+ * @param {string} today Current date in YYYY-MM-DD form.
+ * @returns {{period: object, daysCounted: number, pagesReadTotal: number,
+ *   hasData: boolean, averagePagesPerDay: number|null, message?: string}}
+ *   Summary; average is null and message is set when no records match.
+ */
 function calculateStatistics(records, period, today) {
   const elapsedEndDate = period.endDate < today ? period.endDate : today;
   const daysCounted =

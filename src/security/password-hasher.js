@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @fileoverview Password hashing and verification using Node.js scrypt.
+ */
+
 const { randomBytes, scrypt: scryptCallback, timingSafeEqual } = require('node:crypto');
 const { promisify } = require('node:util');
 
@@ -10,6 +14,16 @@ const COST = 16384;
 const BLOCK_SIZE = 8;
 const PARALLELIZATION = 1;
 
+/**
+ * Derives a password hash using scrypt and a cryptographically random salt.
+ *
+ * The returned self-describing string contains the fixed work parameters, salt,
+ * and derived key in base64url form; the plaintext password is never returned.
+ *
+ * @param {string} password Non-empty plaintext password.
+ * @returns {Promise<string>} Encoded scrypt hash suitable for persistence.
+ * @throws {TypeError} If password is not a non-empty string.
+ */
 async function hashPassword(password) {
   if (typeof password !== 'string' || password.length === 0) {
     throw new TypeError('Password must be a non-empty string');
@@ -32,6 +46,16 @@ async function hashPassword(password) {
   ].join('$');
 }
 
+/**
+ * Checks a password against a hash produced by {@link hashPassword}.
+ *
+ * Malformed, unsupported, or non-string inputs return false. Key comparison is
+ * performed with `timingSafeEqual`.
+ *
+ * @param {string} password Candidate plaintext password.
+ * @param {string} encodedHash Encoded scrypt hash.
+ * @returns {Promise<boolean>} Whether the hash is valid and matches password.
+ */
 async function verifyPassword(password, encodedHash) {
   if (typeof password !== 'string' || typeof encodedHash !== 'string') {
     return false;

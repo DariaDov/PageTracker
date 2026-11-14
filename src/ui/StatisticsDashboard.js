@@ -1,8 +1,32 @@
 'use strict';
 
+/**
+ * @fileoverview React dashboard for reading statistics and goals.
+ */
+
 const React = require('react');
 const { getDateInKyiv } = require('../time/kyiv-date.js');
 
+/**
+ * Renders period selection, statistics, reading-goal progress, and goal controls.
+ *
+ * @param {object} props Component properties.
+ * @param {object|null} props.statistics Statistics result, including period
+ *   bounds and optional goal progress.
+ * @param {'week'|'month'|'year'} [props.selectedPeriod='week'] Selected
+ *   statistics period.
+ * @param {string} [props.selectedDate] Reference date in YYYY-MM-DD form;
+ *   defaults to the current date in Europe/Kyiv.
+ * @param {(selection: {period: string, date: string}) => void}
+ *   props.onPeriodChange Called when a period query is submitted.
+ * @param {{week: object|null, month: object|null}} [props.readingGoals]
+ *   Existing weekly and monthly goals.
+ * @param {(goal: {period: 'week'|'month', targetPages: number}) => void}
+ *   props.onGoalChange Called when a goal is submitted.
+ * @param {('week'|'month') => void} props.onGoalDelete Called for goal deletion.
+ * @param {boolean} [props.error=false] Whether to display the statistics error.
+ * @returns {import('react').ReactElement} Statistics and goal dashboard.
+ */
 function StatisticsDashboard({
   statistics,
   selectedPeriod = 'week',
@@ -71,35 +95,35 @@ function StatisticsDashboard({
       ? React.createElement('p', { role: 'alert' }, 'Помилка')
       : statistics
         ? React.createElement(
-            React.Fragment,
+          React.Fragment,
+          null,
+          React.createElement(
+            'p',
             null,
-            React.createElement(
-              'p',
+            `Період: ${statistics.period.startDate} — ${statistics.period.endDate}`,
+          ),
+          statistics.hasData
+            ? React.createElement(
+              React.Fragment,
               null,
-              `Період: ${statistics.period.startDate} — ${statistics.period.endDate}`,
-            ),
-            statistics.hasData
-              ? React.createElement(
-                  React.Fragment,
-                  null,
-                  React.createElement(
-                    'p',
-                    null,
-                    `Середнє за день: ${statistics.averagePagesPerDay} сторінок`,
-                  ),
-                  React.createElement(
-                    'p',
-                    null,
-                    `Днів у періоді: ${statistics.daysCounted}`,
-                  ),
-                  React.createElement(
-                    'p',
-                    null,
-                    `Усього прочитано: ${statistics.pagesReadTotal} сторінок`,
-                  ),
-                )
-              : React.createElement('p', null, statistics.message),
-          )
+              React.createElement(
+                'p',
+                null,
+                `Середнє за день: ${statistics.averagePagesPerDay} сторінок`,
+              ),
+              React.createElement(
+                'p',
+                null,
+                `Днів у періоді: ${statistics.daysCounted}`,
+              ),
+              React.createElement(
+                'p',
+                null,
+                `Усього прочитано: ${statistics.pagesReadTotal} сторінок`,
+              ),
+            )
+            : React.createElement('p', null, statistics.message),
+        )
         : null,
     React.createElement(
       'section',
@@ -107,34 +131,34 @@ function StatisticsDashboard({
       React.createElement('h2', { id: 'reading-goals-heading' }, 'Цілі читання'),
       statistics?.goalProgress
         ? React.createElement(
-            'div',
-            { 'data-section': 'reading-goal-progress' },
-            React.createElement(
-              'h3',
-              null,
-              statistics.period.type === 'week' ? 'Ціль на тиждень' : 'Ціль на місяць',
-            ),
-            React.createElement(
-              'p',
-              null,
-              `Прочитано: ${statistics.goalProgress.pagesRead} із ${statistics.goalProgress.targetPages} сторінок`,
-            ),
-            React.createElement(
-              'p',
-              null,
-              `Залишилося: ${statistics.goalProgress.remainingPages} сторінок`,
-            ),
-            React.createElement(
-              'p',
-              null,
-              `Виконано: ${statistics.goalProgress.percentage}%`,
-            ),
-            React.createElement(
-              'p',
-              null,
-              statistics.goalProgress.achieved ? 'Ціль досягнуто' : 'Ціль ще не досягнуто',
-            ),
-          )
+          'div',
+          { 'data-section': 'reading-goal-progress' },
+          React.createElement(
+            'h3',
+            null,
+            statistics.period.type === 'week' ? 'Ціль на тиждень' : 'Ціль на місяць',
+          ),
+          React.createElement(
+            'p',
+            null,
+            `Прочитано: ${statistics.goalProgress.pagesRead} із ${statistics.goalProgress.targetPages} сторінок`,
+          ),
+          React.createElement(
+            'p',
+            null,
+            `Залишилося: ${statistics.goalProgress.remainingPages} сторінок`,
+          ),
+          React.createElement(
+            'p',
+            null,
+            `Виконано: ${statistics.goalProgress.percentage}%`,
+          ),
+          React.createElement(
+            'p',
+            null,
+            statistics.goalProgress.achieved ? 'Ціль досягнуто' : 'Ціль ще не досягнуто',
+          ),
+        )
         : null,
       React.createElement(
         'form',

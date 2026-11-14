@@ -1,0 +1,16 @@
+TEST-13 GREEN and regression evidence
+Date: 2026-11-13
+Feature: Reading Goals (ADD-02)
+Test file: tests/test-13-reading-goals.test.js
+
+Focused TEST-13 result recorded for VER-13:
+- Local API/UI scenarios: 11 passed.
+
+Full project regression reported by the user from their terminal:
+ℹ tests 116
+ℹ pass 116
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1702.693067

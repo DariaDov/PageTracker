@@ -1,7 +1,24 @@
 'use strict';
 
+/**
+ * @fileoverview React view for creating books and navigating library pages.
+ */
+
 const React = require('react');
 
+/**
+ * Renders the current library page, book-creation form, and pagination.
+ *
+ * @param {object} props Component properties.
+ * @param {Array<object>} props.books Books to display on the current page.
+ * @param {{page: number, totalPages: number}} props.pagination Current page
+ *   and total page count.
+ * @param {(book: {title: string, author: string, totalPages: number}) => void}
+ *   props.onCreate Called with the submitted book fields.
+ * @param {(page: number) => void} props.onPageChange Called when another page
+ *   is selected.
+ * @returns {import('react').ReactElement} Library list and controls.
+ */
 function BookLibrary({ books, pagination, onCreate, onPageChange }) {
   function handleSubmit(event) {
     event.preventDefault();
@@ -79,10 +96,10 @@ function BookLibrary({ books, pagination, onCreate, onPageChange }) {
     ),
     pagination.totalPages > 1
       ? React.createElement(
-          'nav',
-          { 'aria-label': 'Сторінки бібліотеки' },
-          pageButtons,
-        )
+        'nav',
+        { 'aria-label': 'Сторінки бібліотеки' },
+        pageButtons,
+      )
       : null,
   );
 }

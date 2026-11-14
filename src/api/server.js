@@ -1,7 +1,13 @@
 'use strict';
 
+/**
+ * @fileoverview HTTP API routes, request validation, sessions, and web delivery.
+ */
+
 const { createServer } = require('node:http');
 const { createHash, randomBytes } = require('node:crypto');
+const { readFile } = require('node:fs/promises');
+const { resolve } = require('node:path');
 const { verifyPassword } = require('../security/password-hasher.js');
 const { createActionLogger } = require('../observability/action-logger.js');
 const { RegistrationError, registerUser } = require('../application/registration-service.js');
@@ -428,16 +434,102 @@ function clearedSessionCookie() {
   return `${SESSION_COOKIE}=; Path=/api; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
 }
 
-function createApiServer({ store, logger = createActionLogger() } = {}) {
+const WEB_FILES = new Map([
+  ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
+  ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
+]);
+
+function isWebRoute(pathname) {
+  return pathname === '/'
+    || pathname === '/login'
+    || pathname === '/register'
+    || pathname === '/books'
+    || /^\/books\/[^/]+$/.test(pathname)
+    || pathname === '/statistics';
+}
+
+async function serveWebRequest(request, response, webRoot) {
+  if (!webRoot || !['GET', 'HEAD'].includes(request.method)) {
+    return false;
+  }
+
+  const pathname = new URL(request.url, 'http://localhost').pathname;
+  if (pathname.startsWith('/api/')) {
+    return false;
+  }
+
+  const asset = WEB_FILES.get(pathname);
+  if (!asset && !isWebRoute(pathname)) {
+    return false;
+  }
+
+  const [fileName, contentType] = asset ?? ['index.html', 'text/html; charset=utf-8'];
+  let contents;
+  try {
+    contents = await readFile(resolve(webRoot, fileName));
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+    sendJson(response, 500, {
+      type: 'urn:pagetracker:problem:WEB_ASSET_MISSING',
+      title: 'Internal Server Error',
+      status: 500,
+      code: 'WEB_ASSET_MISSING',
+      detail: 'Не вдалося завантажити вебзастосунок',
+      instance: pathname,
+    }, 'application/problem+json; charset=utf-8');
+    return true;
+  }
+
+  response.writeHead(200, {
+    'content-type': contentType,
+    'content-length': contents.length,
+    'cache-control': 'no-cache',
+    'content-security-policy': "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'none'",
+    'referrer-policy': 'strict-origin-when-cross-origin',
+    'x-content-type-options': 'nosniff',
+  });
+  response.end(request.method === 'HEAD' ? undefined : contents);
+  return true;
+}
+
+/**
+ * Creates the PageTracker HTTP server.
+ *
+ * The store must provide user lookup and creation and the repositories used by
+ * the requested routes. The optional logger must implement `logAction`; when
+ * `webRoot` is provided, the server also serves the browser app and its known
+ * static assets from that directory.
+ *
+ * @param {object} options Server dependencies.
+ * @param {object} options.store Persistence store.
+ * @param {{logAction: Function}} [options.logger] Action logger; defaults to
+ *   the stdout JSON logger.
+ * @param {string} [options.webRoot] Directory containing `index.html`,
+ *   `app.js`, and `styles.css`; omit to serve only API routes.
+ * @returns {import('node:http').Server} Unstarted Node.js HTTP server.
+ * @throws {TypeError} If the store, logger, or web root has an invalid shape.
+ */
+function createApiServer({ store, logger = createActionLogger(), webRoot } = {}) {
   if (!store?.users || typeof store.users.findByEmail !== 'function' || typeof store.users.create !== 'function') {
     throw new TypeError('Store must provide user lookup and creation');
   }
   if (!logger || typeof logger.logAction !== 'function') {
     throw new TypeError('Logger must provide logAction');
   }
+  if (webRoot !== undefined && typeof webRoot !== 'string') {
+    throw new TypeError('Web root must be a path string');
+  }
+  const resolvedWebRoot = webRoot === undefined ? null : resolve(webRoot);
 
   return createServer((request, response) => {
-    void handleRequest(request, response, { store, logger }).catch((error) => {
+    void (async () => {
+      if (await serveWebRequest(request, response, resolvedWebRoot)) {
+        return;
+      }
+      await handleRequest(request, response, { store, logger });
+    })().catch((error) => {
       if (response.headersSent) {
         response.destroy(error);
         return;
@@ -878,6 +970,16 @@ async function handleRequest(request, response, { store, logger }) {
     status = body.status;
     contentType = 'application/problem+json; charset=utf-8';
     noContent = false;
+    if (status === 500) {
+      console.error(JSON.stringify({
+        event: 'api.unexpected_error',
+        action,
+        method: request.method ?? 'UNKNOWN',
+        path: pathname,
+        errorName: error instanceof Error ? error.name : 'UnknownError',
+        errorMessage: error instanceof Error ? error.message : 'Unknown server error',
+      }));
+    }
   }
 
   try {

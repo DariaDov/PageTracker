@@ -4,7 +4,6 @@ const assert = require('node:assert/strict');
 const { createHash, randomUUID } = require('node:crypto');
 const { test } = require('node:test');
 const React = require('react');
-const { renderToStaticMarkup } = require('react-dom/server');
 
 function createMemoryStore({ failDeleteAfterCascade = false } = {}) {
   const users = [

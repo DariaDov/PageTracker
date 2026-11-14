@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @fileoverview PostgreSQL persistence adapter and repository construction.
+ */
+
 const { randomUUID } = require('node:crypto');
 const { Pool } = require('pg');
 const { withTransaction } = require('./transaction.js');
@@ -262,7 +266,8 @@ function createRepositories(queryable) {
       async updateForUser(recordId, userId, { startPage, endPage }) {
         const { rows } = await queryable.query(
           `UPDATE reading_records AS r
-           SET start_page = $3, end_page = $4, pages_read = $4 - $3 + 1
+           SET start_page = $3, end_page = $4,
+               pages_read = $4::integer - $3::integer + 1
            FROM books AS b
            WHERE r.id = $1 AND b.id = r.book_id AND b.user_id = $2
            RETURNING r.id, r.book_id, r.start_page, r.end_page, r.pages_read, r.date`,
@@ -315,6 +320,21 @@ function createRepositories(queryable) {
   };
 }
 
+/**
+ * Creates a PostgreSQL-backed store and its user, session, book, reading-record,
+ * and reading-goal repositories.
+ *
+ * Call `migrate()` before using the repositories. `transaction(operation)`
+ * passes transaction-scoped repositories to the callback; `close()` releases
+ * the pool and should be called when the store is no longer needed.
+ *
+ * @param {object} options Store configuration.
+ * @param {string} options.connectionString PostgreSQL connection string.
+ * @returns {Promise<object>} Store exposing `migrate`, `transaction`, `close`,
+ *   and the repositories described above. Repository methods are asynchronous
+ *   and scope user-owned records by user ID.
+ * @throws {TypeError} If the connection string is missing or empty.
+ */
 async function createPostgresStore({ connectionString } = {}) {
   if (typeof connectionString !== 'string' || connectionString.length === 0) {
     throw new TypeError('A PostgreSQL connection string is required');

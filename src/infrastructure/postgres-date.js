@@ -1,5 +1,19 @@
 'use strict';
 
+/**
+ * @fileoverview Converts PostgreSQL calendar dates without timezone drift.
+ */
+
+/**
+ * Converts a node-postgres DATE value into its YYYY-MM-DD calendar form.
+ *
+ * Strings are returned unchanged. Date objects are formatted using local date
+ * fields because node-postgres represents SQL DATE values as local midnight.
+ *
+ * @param {string|Date} value PostgreSQL DATE value.
+ * @returns {string} Calendar date in YYYY-MM-DD form.
+ * @throws {TypeError} If value is not a string or valid Date.
+ */
 function mapCalendarDate(value) {
   if (typeof value === 'string') {
     return value;

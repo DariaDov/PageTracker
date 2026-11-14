@@ -1,0 +1,19 @@
+TEST-13 initial RED
+Date: 2026-11-13
+Feature: Reading Goals (ADD-02)
+Test file: tests/test-13-reading-goals.test.js
+
+Evidence source: the contemporaneous TEST-13 status recorded in spec/decomposition.md.
+The original raw test-run output was not retained; this file records the documented
+result and failure reasons, not a verbatim console transcript.
+
+Result:
+- Local tests: 11 failed, 0 passed.
+- Syntax/test-definition errors: none reported.
+
+Expected RED reasons:
+- Reading-goal API routes were not implemented and requests returned 404.
+- Goal progress behavior was not implemented.
+- Reading-goal UI controls were not implemented.
+
+This RED was recorded before FEAT-12 implementation.

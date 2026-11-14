@@ -1,7 +1,19 @@
 'use strict';
 
+/**
+ * @fileoverview Shared navigation and shell for authenticated React pages.
+ */
+
 const React = require('react');
 
+/**
+ * Renders the authenticated page shell with primary navigation and logout.
+ *
+ * @param {object} props Component properties.
+ * @param {import('react').ReactNode} props.children Page content.
+ * @param {() => void} props.onLogout Called when the user requests logout.
+ * @returns {import('react').ReactElement} Authenticated layout.
+ */
 function AuthenticatedLayout({ children, onLogout }) {
   return React.createElement(
     'div',

@@ -1,0 +1,31 @@
+TEST-14 browser application verification
+Date: 2026-11-13
+
+Automated web-server tests:
+- `node --test tests/test-14-browser-app.test.js`
+- 3 passed, 0 failed, 0 skipped.
+- Verified the browser entry point, JavaScript/CSS assets, SPA routes, unknown-route 404, and API route isolation.
+
+Interactive Chromium check:
+- Temporary local `createApiServer` instance with a controlled in-memory store.
+- Registration did not automatically sign in; login opened the protected home page.
+- Created a book, recorded its full page range, and verified the current-period statistics.
+- Set a weekly goal, observed the achieved-progress state, and removed the goal.
+- Rated the completed book, deleted it, and verified the empty library state.
+- Logged out and verified a protected route returned to the sign-in page.
+
+Result: passed after correcting the browser client to preserve the API pagination envelope.
+
+Full automated regression:
+- Initial `npm test`: 119 tests, 114 passed, 0 failed, 5 skipped.
+- All 5 skips require `TEST_DATABASE_URL`; they were not counted as passes.
+
+Follow-up for the reported record-edit error:
+- Added an API acceptance case for changing the sole record from pages 1–125 to 1–100 on a 215-page book.
+- Targeted `node --test tests/test-09-reading-record-management.test.js`: 12 passed, 0 failed.
+- Latest full `npm test`: 120 tests, 115 passed, 0 failed, 5 skipped.
+- The production-like PostgreSQL case remains unverified because `TEST_DATABASE_URL` is unavailable.
+
+Limitations:
+- The interactive run used an in-memory test store; PostgreSQL persistence and production HTTPS were not exercised.
+- PostgreSQL-dependent automated acceptance tests remain skipped when `TEST_DATABASE_URL` is unset.
